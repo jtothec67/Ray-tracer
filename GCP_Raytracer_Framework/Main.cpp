@@ -1,5 +1,7 @@
 #include "GCP_GFX_Framework.h"
 
+#include "RayTracer.h"
+#include "Camera.h"
 #include "Sphere.h"
 
 int main(int argc, char* argv[])
@@ -16,19 +18,25 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	// Preparing a position to draw a pixel
-	glm::ivec2 pixelPosition = winSize / 2;
+	Camera camera;
 
-	// Preparing a colour to draw
-	// Colours are RGB, each value ranges between 0 and 1
-	glm::vec3 pixelColour(1, 0, 0);
+	RayTracer rayTracer;
 
+	Sphere sphere1(glm::vec3((winSize.x / 2) - 100, winSize.y / 2, -100), 100, glm::vec3(0, 1, 0));
+	rayTracer.mSpheres.push_back(&sphere1);
 
-	// Sets all pixels the same colour
-	_myFramework.SetAllPixels( glm::vec3(0.1f,0.1f,0.3f) );
+	Sphere sphere2(glm::vec3((winSize.x / 2) + 100, winSize.y / 2, -100), 100, glm::vec3(1, 0, 0));
+	rayTracer.mSpheres.push_back(&sphere2);
 
-	// Draws a single pixel
-	_myFramework.DrawPixel(pixelPosition, pixelColour);
+	for (int y = 0; y < winSize.y; ++y)
+	{
+		for (int x = 0; x < winSize.x; ++x)
+		{
+			Ray ray = camera.GetRay(glm::ivec2(x, y));
+			glm::vec3 colour = rayTracer.TraceRay(ray);
+			_myFramework.DrawPixel(glm::ivec2(x, y), colour);
+		}
+	}
 
 	// Pushes the framebuffer to OpenGL and renders to screen
 	// Also contains an event loop that keeps the window going until it's closed

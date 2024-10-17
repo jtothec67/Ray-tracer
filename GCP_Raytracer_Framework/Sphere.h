@@ -14,6 +14,8 @@ public:
 	glm::vec3 GetAlbedo() { return mAlbedo; }
 
 	bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition);
+	bool RayIntersect2(Ray _ray, glm::vec3& _intersectPosition);
+	bool RayIntersect3(Ray _ray, glm::vec3& _intersectPosition);
 	glm::vec3 ShadeAtPosition(glm::vec3 _intersectPosition);
 	glm::vec3 NormalAtPosition(glm::vec3 _intersectPosition);
 
