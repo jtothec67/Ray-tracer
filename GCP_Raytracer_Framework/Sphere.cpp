@@ -40,7 +40,10 @@ bool Sphere::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)
 glm::vec3 Sphere::ShadeAtPosition(glm::vec3 _intersectPosition)
 {
 	glm::vec3 wi = glm::vec3(0.0f, 0.5f, 0.5f);
-	glm::vec3 L = (glm::dot(wi, NormalAtPosition(_intersectPosition))) * mAlbedo;
+	glm::vec3 lightCol = glm::vec3(1.f, 1.f, 1.f);
+	glm::vec3 ambient = glm::vec3(0.01f, 0.01f, 0.01f);
+	glm::vec3 L = (glm::dot(wi, NormalAtPosition(_intersectPosition))) * mAlbedo * lightCol + ambient;
+
 	return L;
 }
 

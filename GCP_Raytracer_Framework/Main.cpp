@@ -22,10 +22,10 @@ int main(int argc, char* argv[])
 
 	RayTracer rayTracer;
 
-	Sphere sphere1(glm::vec3((winSize.x / 2) - 100, winSize.y / 2, -100), 100, glm::vec3(0, 1, 0));
+	Sphere sphere1(glm::vec3((winSize.x / 2) - 100, winSize.y / 2, -150), 100, glm::vec3(0, 1, 0));
 	rayTracer.mSpheres.push_back(&sphere1);
 
-	Sphere sphere2(glm::vec3((winSize.x / 2) + 100, winSize.y / 2, -100), 100, glm::vec3(1, 0, 0));
+	Sphere sphere2(glm::vec3((winSize.x / 2) + 100, winSize.y / 2, -150), 100, glm::vec3(1, 0, 0));
 	rayTracer.mSpheres.push_back(&sphere2);
 
 	for (int y = 0; y < winSize.y; ++y)
