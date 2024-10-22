@@ -8,11 +8,11 @@ class Camera
 {
 public:
 
-	Camera() {}
+	Camera(glm::vec3 _position, glm::ivec2 _winSize);
 	~Camera() {}
 
-	Ray GetRay(glm::ivec2 _windowPos);
+	Ray GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize);
 
-	glm::mat4 mView{ 0 };
-	glm::mat4 mProjection{ 0 };
+	glm::mat4 mView{ 1.f };
+	glm::mat4 mProjection{ 1.f };
 };

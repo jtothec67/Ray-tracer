@@ -2,15 +2,25 @@
 
 glm::vec3 RayTracer::TraceRay(Ray _ray)
 {
-	for (auto sphere : mSpheres)
+	glm::vec3 pixelCol = glm::vec3(0, 0, 0.2f);
+
+	float closestLength = 10000.f;
+
+	for (auto rayObject : rayObjects)
 	{
 		glm::vec3 hitPos;
-		if (sphere->RayIntersect(_ray, hitPos))
+		if (rayObject->RayIntersect(_ray, hitPos))
 		{
-			return sphere->ShadeAtPosition(hitPos);
-			break;
+			glm::vec3 hitToOrigin = _ray.origin - hitPos;
+			float length = glm::length(hitToOrigin);
+			
+			if (length < closestLength)
+			{
+				pixelCol = rayObject->ShadeAtPosition(hitPos);
+				closestLength = length;
+			}
 		}
 	}
 
-	return glm::vec3(0, 0, 0.2f);
+	return pixelCol;
 }

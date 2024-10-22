@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Sphere.h"
+#include "RayObject.h"
 
 #include <vector>
 
@@ -12,5 +12,5 @@ public:
 
 	glm::vec3 TraceRay(Ray _ray);
 
-	std::vector<Sphere*> mSpheres;
+	std::vector<RayObject*> rayObjects;
 };
