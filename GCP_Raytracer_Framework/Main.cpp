@@ -27,10 +27,10 @@ int main(int argc, char* argv[])
 	Sphere sphere1(glm::vec3(-5, 0, -50), 10, glm::vec3(0, 1, 0));
 	rayTracer.rayObjects.push_back((RayObject*)&sphere1);
 
-	Sphere sphere2(glm::vec3(5, 0, -60), 10, glm::vec3(1, 0, 0));
+	Sphere sphere2(glm::vec3(5, -5, -60), 10, glm::vec3(1, 0, 0));
 	rayTracer.rayObjects.push_back((RayObject*)&sphere2);
 
-	Plane plane(glm::vec3(0, -9, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
+	Plane plane(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
 	rayTracer.rayObjects.push_back((RayObject*)&plane);
 
 	for (int y = 0; y < winSize.y; ++y)
