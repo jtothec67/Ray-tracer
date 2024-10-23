@@ -20,15 +20,6 @@ bool Plane::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)
 	return true;
 }
 
-glm::vec3 Plane::ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _lightDir)
-{
-	glm::vec3 lightDir = glm::normalize(_lightDir);
-	glm::vec3 lightCol = glm::vec3(1, 1, 1);
-	glm::vec3 L = (glm::dot(lightDir, mNormal)) * mAlbedo * lightCol;
-
-	return L;
-}
-
 glm::vec3 Plane::NormalAtPosition(glm::vec3 _intersectPosition)
 {
 	return mNormal;

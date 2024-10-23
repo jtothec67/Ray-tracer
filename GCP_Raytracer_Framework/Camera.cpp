@@ -3,12 +3,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-Camera::Camera(glm::vec3 _position, glm::ivec2 _winSize)
+Camera::Camera(glm::vec3 _position, glm::vec3 _rotation, glm::ivec2 _winSize)
 {
-	mView = glm::translate(mView, _position);
-	mView = glm::inverse(mView);
+	viewMat = glm::translate(viewMat, _position);
+	viewMat = glm::rotate(viewMat, glm::radians(_rotation.x), glm::vec3(1, 0, 0));
+	viewMat = glm::rotate(viewMat, glm::radians(_rotation.y), glm::vec3(0, 1, 0));
+	viewMat = glm::rotate(viewMat, glm::radians(_rotation.z), glm::vec3(0, 0, 1));
+	viewMat = glm::inverse(viewMat);
 
-	mProjection = glm::perspective(glm::radians(60.f), (float)_winSize.x / (float)_winSize.y, 0.1f, 100.f);
+	projectionMat = glm::perspective(glm::radians(60.f), (float)_winSize.x / (float)_winSize.y, 0.1f, 100.f);
 }
 
 Ray Camera::GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize)
@@ -29,14 +32,14 @@ Ray Camera::GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize)
 	glm::vec4 farPoint = nearPoint;
 	farPoint.z = 1;
 
-	nearPoint = glm::inverse(mProjection) * nearPoint;
-	farPoint = glm::inverse(mProjection) * farPoint;
+	nearPoint = glm::inverse(projectionMat) * nearPoint;
+	farPoint = glm::inverse(projectionMat) * farPoint;
 
 	nearPoint = nearPoint / nearPoint.w;
 	farPoint = farPoint / farPoint.w;
 
-	nearPoint = mView * nearPoint;
-	farPoint = mView * farPoint;
+	nearPoint = viewMat * nearPoint;
+	farPoint = viewMat * farPoint;
 
 	Ray ray;
 	ray.origin = glm::vec3(nearPoint);

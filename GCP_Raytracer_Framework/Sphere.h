@@ -13,7 +13,6 @@ public:
 	~Sphere() {}
 
 	bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition) override;
-	glm::vec3 ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _lightDir) override;
 	glm::vec3 NormalAtPosition(glm::vec3 _intersectPosition) override;
 
 private:

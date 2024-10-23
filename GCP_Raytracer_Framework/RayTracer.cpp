@@ -2,7 +2,7 @@
 
 glm::vec3 RayTracer::TraceRay(Ray _ray)
 {
-	glm::vec3 lightDir = glm::normalize(glm::vec3(0.f, 0.5f, 0.5f));
+	glm::vec3 lightDir = glm::normalize(glm::vec3(0.f, 0.75f, 0.25f));
 	glm::vec3 pixelCol = glm::vec3(0, 0, 0.2f);
 
 	float closestLength = 10000.f;
