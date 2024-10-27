@@ -5,7 +5,10 @@
 #include "RayObject.h"
 #include "Sphere.h"
 #include "Plane.h"
+#include "Light.h"
 #include "Timer.h"
+
+#include <vector>
 
 int main(int argc, char* argv[])
 {
@@ -26,19 +29,34 @@ int main(int argc, char* argv[])
 
 	Camera camera(camPos, camRot, winSize);
 
+	std::vector<Light> lights;
+	Light light1(glm::vec3(-40, 0, -50), glm::vec3(1, 1, 1));
+	lights.push_back(light1);
+
+	Light light2(glm::vec3(20, 0, -50), glm::vec3(1, 1, 1));
+	lights.push_back(light2);
+
 	RayTracer rayTracer;
 
 	Sphere sphere1(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0));
-	rayTracer.rayObjects.push_back((RayObject*)&sphere1);
+	RayObject* raySphere1 = (RayObject*)&sphere1;
+	raySphere1->SetLights(&lights);
+	rayTracer.rayObjects.push_back(raySphere1);
 
 	Sphere sphere2(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0));
-	rayTracer.rayObjects.push_back((RayObject*)&sphere2);
+	RayObject* raySphere2 = (RayObject*)&sphere2;
+	raySphere2->SetLights(&lights);
+	rayTracer.rayObjects.push_back(raySphere2);
 
 	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
-	rayTracer.rayObjects.push_back((RayObject*)&plane1);
+	RayObject* rayPlane1 = (RayObject*)&plane1;
+	rayPlane1->SetLights(&lights);
+	rayTracer.rayObjects.push_back(rayPlane1);
 
 	Plane plane2(glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(0, 0, 1));
-	rayTracer.rayObjects.push_back((RayObject*)&plane2);
+	RayObject* rayPlane2 = (RayObject*)&plane2;
+	rayPlane2->SetLights(&lights);
+	rayTracer.rayObjects.push_back(rayPlane2);
 
 	{
 		Timer timer;
