@@ -9,7 +9,6 @@ Camera::Camera(glm::vec3 _position, glm::vec3 _rotation, glm::ivec2 _winSize)
 	viewMat = glm::rotate(viewMat, glm::radians(_rotation.x), glm::vec3(1, 0, 0));
 	viewMat = glm::rotate(viewMat, glm::radians(_rotation.y), glm::vec3(0, 1, 0));
 	viewMat = glm::rotate(viewMat, glm::radians(_rotation.z), glm::vec3(0, 0, 1));
-	viewMat = glm::inverse(viewMat);
 
 	projectionMat = glm::perspective(glm::radians(60.f), (float)_winSize.x / (float)_winSize.y, 0.1f, 100.f);
 }
@@ -38,8 +37,8 @@ Ray Camera::GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize)
 	nearPoint = nearPoint / nearPoint.w;
 	farPoint = farPoint / farPoint.w;
 
-	nearPoint = viewMat * nearPoint;
-	farPoint = viewMat * farPoint;
+	nearPoint = glm::inverse(viewMat) * nearPoint;
+	farPoint = glm::inverse(viewMat) * farPoint;
 
 	Ray ray;
 	ray.origin = glm::vec3(nearPoint);
