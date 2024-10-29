@@ -11,11 +11,22 @@
 #include <vector>
 #include <thread>
 
-void TracePixel(int _x, int _y, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
+void TracePixel(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
-	Ray ray = _camera->GetRay(glm::ivec2(_x, _y), _winSize);
+	for (int y = _fromy; y <= _toy; ++y)
+	{
+		if (y == _winSize.y) break;
+		for (int x = _fromx; x <= _tox; ++x)
+		{
+			if (x == _winSize.x) break;
+			Ray ray = _camera->GetRay(glm::ivec2(x, y), _winSize);
+			glm::vec3 colour = _rayTracer->TraceRay(ray);
+			_myFramework->DrawPixel(glm::ivec2(x, y), colour);
+		}
+	}
+	/*Ray ray = _camera->GetRay(glm::ivec2(_fromx, _fromy), _winSize);
 	glm::vec3 colour = _rayTracer->TraceRay(ray);
-	_myFramework->DrawPixel(glm::ivec2(_x, _y), colour);
+	_myFramework->DrawPixel(glm::ivec2(_fromx, _fromy), colour);*/
 }
 
 int main(int argc, char* argv[])
@@ -66,7 +77,7 @@ int main(int argc, char* argv[])
 	rayPlane2->SetLights(&lights);
 	rayTracer.rayObjects.push_back(rayPlane2);
 
-	/*{
+	{
 		Timer timer;
 
 		for (int y = 0; y < winSize.y; ++y)
@@ -78,49 +89,52 @@ int main(int argc, char* argv[])
 				_myFramework.DrawPixel(glm::ivec2(x, y), colour);
 			}
 		}
-	}*/
+	}
 
 	std::vector<std::thread> threads;
 
 	{
 		Timer timer;
 
-		for (int y = 0; y < winSize.y; ++y)
+		/*for (int y = 0; y < winSize.y; ++y)
 		{
 			for (int x = 0; x < winSize.x; ++x)
 			{
 				if (x <= winSize.x / 2 && y <= winSize.y / 2)
 				{
-					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					std::thread bottomLeft(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
 					bottomLeft.join();
 				}
 
 				if (x >= winSize.x / 2 && y <= winSize.y / 2)
 				{
-					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
-					bottomLeft.join();
+					std::thread bottomRight(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					bottomRight.join();
 				}
 
 				if (x >= winSize.x / 2 && y >= winSize.y / 2)
 				{
-					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
-					bottomLeft.join();
+					std::thread topRight(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					topRight.join();
 				}
 
 				if (x <= winSize.x / 2 && y >= winSize.y / 2)
 				{
-					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
-					bottomLeft.join();
+					std::thread topLeft(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					topLeft.join();
 				}
-				
-				//threads.push_back(std::thread(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework));
 			}
-		}
-
-		/*for (std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); ++it)
-		{
-			it->join();
 		}*/
+
+		std::thread bottomLeft(TracePixel, 0, 0, winSize.x / 2, winSize.y / 2, winSize, &camera, &rayTracer, &_myFramework);
+		std::thread bottomRight(TracePixel, winSize.x / 2, 0, winSize.x, winSize.y / 2, winSize, &camera, &rayTracer, &_myFramework);
+		std::thread topRight(TracePixel, winSize.x / 2, winSize.y / 2, winSize.x, winSize.y, winSize, &camera, &rayTracer, &_myFramework);
+		std::thread topLeft(TracePixel, 0, winSize.y / 2, winSize.x / 2, winSize.y, winSize, &camera, &rayTracer, &_myFramework);
+
+		bottomLeft.join();
+		bottomRight.join();
+		topRight.join();
+		topLeft.join();
 	}
 
 	// Pushes the framebuffer to OpenGL and renders to screen
