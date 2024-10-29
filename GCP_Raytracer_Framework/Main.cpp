@@ -9,6 +9,14 @@
 #include "Timer.h"
 
 #include <vector>
+#include <thread>
+
+void TracePixel(int _x, int _y, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
+{
+	Ray ray = _camera->GetRay(glm::ivec2(_x, _y), _winSize);
+	glm::vec3 colour = _rayTracer->TraceRay(ray);
+	_myFramework->DrawPixel(glm::ivec2(_x, _y), colour);
+}
 
 int main(int argc, char* argv[])
 {
@@ -30,7 +38,7 @@ int main(int argc, char* argv[])
 	Camera camera(camPos, camRot, winSize);
 
 	std::vector<Light> lights;
-	Light light1(glm::vec3(-40, 0, -50), glm::vec3(1, 1, 1));
+	Light light1(glm::vec3(-40, 0, -40), glm::vec3(1, 1, 1));
 	lights.push_back(light1);
 
 	Light light2(glm::vec3(20, 0, -50), glm::vec3(1, 1, 1));
@@ -58,7 +66,7 @@ int main(int argc, char* argv[])
 	rayPlane2->SetLights(&lights);
 	rayTracer.rayObjects.push_back(rayPlane2);
 
-	{
+	/*{
 		Timer timer;
 
 		for (int y = 0; y < winSize.y; ++y)
@@ -70,6 +78,49 @@ int main(int argc, char* argv[])
 				_myFramework.DrawPixel(glm::ivec2(x, y), colour);
 			}
 		}
+	}*/
+
+	std::vector<std::thread> threads;
+
+	{
+		Timer timer;
+
+		for (int y = 0; y < winSize.y; ++y)
+		{
+			for (int x = 0; x < winSize.x; ++x)
+			{
+				if (x <= winSize.x / 2 && y <= winSize.y / 2)
+				{
+					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					bottomLeft.join();
+				}
+
+				if (x >= winSize.x / 2 && y <= winSize.y / 2)
+				{
+					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					bottomLeft.join();
+				}
+
+				if (x >= winSize.x / 2 && y >= winSize.y / 2)
+				{
+					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					bottomLeft.join();
+				}
+
+				if (x <= winSize.x / 2 && y >= winSize.y / 2)
+				{
+					std::thread bottomLeft(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework);
+					bottomLeft.join();
+				}
+				
+				//threads.push_back(std::thread(TracePixel, x, y, winSize, &camera, &rayTracer, &_myFramework));
+			}
+		}
+
+		/*for (std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); ++it)
+		{
+			it->join();
+		}*/
 	}
 
 	// Pushes the framebuffer to OpenGL and renders to screen
