@@ -77,6 +77,7 @@ int main(int argc, char* argv[])
 	rayPlane2->SetLights(&lights);
 	rayTracer.rayObjects.push_back(rayPlane2);
 
+	/*std::cout << "Sequentially - " << std::endl;
 	{
 		Timer timer;
 
@@ -91,40 +92,9 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	std::vector<std::thread> threads;
-
+	std::cout << "4 Threads - " << std::endl;
 	{
 		Timer timer;
-
-		/*for (int y = 0; y < winSize.y; ++y)
-		{
-			for (int x = 0; x < winSize.x; ++x)
-			{
-				if (x <= winSize.x / 2 && y <= winSize.y / 2)
-				{
-					std::thread bottomLeft(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
-					bottomLeft.join();
-				}
-
-				if (x >= winSize.x / 2 && y <= winSize.y / 2)
-				{
-					std::thread bottomRight(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
-					bottomRight.join();
-				}
-
-				if (x >= winSize.x / 2 && y >= winSize.y / 2)
-				{
-					std::thread topRight(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
-					topRight.join();
-				}
-
-				if (x <= winSize.x / 2 && y >= winSize.y / 2)
-				{
-					std::thread topLeft(TracePixel, x, y, x, y, winSize, &camera, &rayTracer, &_myFramework);
-					topLeft.join();
-				}
-			}
-		}*/
 
 		std::thread bottomLeft(TracePixel, 0, 0, winSize.x / 2, winSize.y / 2, winSize, &camera, &rayTracer, &_myFramework);
 		std::thread bottomRight(TracePixel, winSize.x / 2, 0, winSize.x, winSize.y / 2, winSize, &camera, &rayTracer, &_myFramework);
@@ -135,6 +105,66 @@ int main(int argc, char* argv[])
 		bottomRight.join();
 		topRight.join();
 		topLeft.join();
+	}*/
+
+	int numberOfThreads = 16;
+	std::cout << numberOfThreads << " Threads - " << std::endl;
+	{
+		Timer timer;
+
+		std::vector<std::thread> threads;
+		int rowsPerThread = std::ceil(winSize.y / static_cast<float>(numberOfThreads));
+
+		for (int i = 0; i < numberOfThreads; ++i) {
+			int startY = i * rowsPerThread;
+			int endY = std::min(startY + rowsPerThread, winSize.y);
+
+			threads.emplace_back(TracePixel, 0, startY, winSize.x - 1, endY - 1, winSize, &camera, &rayTracer, &_myFramework);
+		}
+
+		for (auto& thread : threads) {
+			thread.join();
+		}
+	}
+
+	int numberOfThreads2 = 24;
+	std::cout << numberOfThreads2 << " Threads - " << std::endl;
+	{
+		Timer timer;
+
+		std::vector<std::thread> threads;
+		int rowsPerThread = std::ceil(winSize.y / static_cast<float>(numberOfThreads2));
+
+		for (int i = 0; i < numberOfThreads2; ++i) {
+			int startY = i * rowsPerThread;
+			int endY = std::min(startY + rowsPerThread, winSize.y);
+
+			threads.emplace_back(TracePixel, 0, startY, winSize.x - 1, endY - 1, winSize, &camera, &rayTracer, &_myFramework);
+		}
+
+		for (auto& thread : threads) {
+			thread.join();
+		}
+	}
+
+	int numberOfThreads3 = 32;
+	std::cout << numberOfThreads3 << " Threads - " << std::endl;
+	{
+		Timer timer;
+
+		std::vector<std::thread> threads;
+		int rowsPerThread = std::ceil(winSize.y / static_cast<float>(numberOfThreads3));
+
+		for (int i = 0; i < numberOfThreads3; ++i) {
+			int startY = i * rowsPerThread;
+			int endY = std::min(startY + rowsPerThread, winSize.y);
+
+			threads.emplace_back(TracePixel, 0, startY, winSize.x - 1, endY - 1, winSize, &camera, &rayTracer, &_myFramework);
+		}
+
+		for (auto& thread : threads) {
+			thread.join();
+		}
 	}
 
 	// Pushes the framebuffer to OpenGL and renders to screen

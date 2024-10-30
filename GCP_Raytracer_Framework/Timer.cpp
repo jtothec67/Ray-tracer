@@ -11,7 +11,7 @@ Timer::~Timer()
 {
 	if (mRunning)
 	{
-		std::cout << "That took : " << GetElapsedSeconds() << " seconds" << std::endl;
+		std::cout << "That took: " << GetElapsedSeconds() << " seconds" << std::endl;
 	}
 }
 
