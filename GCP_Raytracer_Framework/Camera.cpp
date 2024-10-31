@@ -5,6 +5,9 @@
 
 Camera::Camera(glm::vec3 _position, glm::vec3 _rotation, glm::ivec2 _winSize)
 {
+	position = _position;
+	rotation = _rotation;
+
 	viewMat = glm::translate(viewMat, _position);
 	viewMat = glm::rotate(viewMat, glm::radians(_rotation.x), glm::vec3(1, 0, 0));
 	viewMat = glm::rotate(viewMat, glm::radians(_rotation.y), glm::vec3(0, 1, 0));

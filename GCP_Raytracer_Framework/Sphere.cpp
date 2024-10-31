@@ -9,11 +9,12 @@ Sphere::Sphere(glm::vec3 _position, float _radius)
 	mAlbedo = glm::vec3(1, 0, 0);
 }
 
-Sphere::Sphere(glm::vec3 _position, float _radius, glm::vec3 _albedo)
+Sphere::Sphere(glm::vec3 _position, float _radius, glm::vec3 _albedo, float _shininess)
 {
 	mPosition = _position;
 	mRadius = _radius;
 	mAlbedo = _albedo;
+	mShininess = _shininess;
 }
 
 bool Sphere::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)

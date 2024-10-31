@@ -13,6 +13,9 @@ public:
 
 	Ray GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize);
 
+	glm::vec3 position{ 0.f };
+	glm::vec3 rotation{ 0.f };
+
 	glm::mat4 viewMat{ 1.f };
 	glm::mat4 projectionMat{ 1.f };
 };

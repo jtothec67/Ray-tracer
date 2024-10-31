@@ -9,7 +9,7 @@ class Sphere : RayObject
 {
 public:
 	Sphere(glm::vec3 _position, float _radius);
-	Sphere(glm::vec3 _position, float _radius, glm::vec3 _albedo);
+	Sphere(glm::vec3 _position, float _radius, glm::vec3 _albedo, float _shininess);
 	~Sphere() {}
 
 	bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition) override;

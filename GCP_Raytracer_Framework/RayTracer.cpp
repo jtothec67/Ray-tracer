@@ -1,9 +1,9 @@
 #include "RayTracer.h"
 
-glm::vec3 RayTracer::TraceRay(Ray _ray)
+glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 {
-	glm::vec3 lightDir = glm::normalize(glm::vec3(0.f, 0.75f, 0.25f));
-	glm::vec3 pixelCol = glm::vec3(0, 0, 0.2f);
+	glm::vec3 currentHitPos;
+	RayObject* currentRayObject = nullptr;
 
 	float closestLength = 10000.f;
 
@@ -14,14 +14,45 @@ glm::vec3 RayTracer::TraceRay(Ray _ray)
 		{
 			glm::vec3 hitToOrigin = _ray.origin - hitPos;
 			float length = glm::length(hitToOrigin);
-			
+
 			if (length < closestLength)
 			{
-				pixelCol = rayObject->ShadeAtPosition(hitPos, lightDir);
+				currentRayObject = rayObject;
+				currentHitPos = hitPos;
 				closestLength = length;
 			}
 		}
 	}
 
-	return pixelCol;
+	if (currentRayObject == nullptr)
+		return glm::vec3(0, 0, 0.2f);
+
+	glm::vec3 finalPixelCol = glm::vec3(0.f, 0.f, 0.f);
+
+	for (auto &light : *mLights)
+	{
+		glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos);
+
+		for (auto rayObject : rayObjects)
+		{
+			if (rayObject == currentRayObject)
+				continue;
+
+			glm::vec3 hitPos;
+
+			glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.01f);
+
+			if (rayObject->RayIntersect(Ray(shadowRayFrom, glm::normalize(light.position - currentHitPos)), hitPos))
+			{
+				if (glm::length(hitPos - currentHitPos) > glm::length(light.position - currentHitPos))
+					continue;
+
+				thisPixelCol = glm::vec3(0, 0, 0);
+			}
+		}
+
+		finalPixelCol += thisPixelCol;
+	}
+
+	return finalPixelCol;
 }
