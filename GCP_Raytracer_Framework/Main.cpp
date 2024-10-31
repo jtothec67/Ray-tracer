@@ -29,6 +29,27 @@ void TracePixel(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize,
 	_myFramework->DrawPixel(glm::ivec2(_fromx, _fromy), colour);*/
 }
 
+void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
+{
+	std::cout << _numOfThreads << " Threads - " << std::endl;
+
+	Timer timer;
+	
+	std::vector<std::thread> threads;
+	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numOfThreads));
+
+	for (int i = 0; i < _numOfThreads; ++i) {
+		int startY = i * rowsPerThread;
+		int endY = std::min(startY + rowsPerThread, _winSize.y);
+
+		threads.emplace_back(TracePixel, 0, startY, _winSize.x - 1, endY - 1, _winSize, _camera, _rayTracer, _myFramework);
+	}
+
+	for (auto& thread : threads) {
+		thread.join();
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	// Set window size
@@ -107,65 +128,7 @@ int main(int argc, char* argv[])
 		topLeft.join();
 	}*/
 
-	int numberOfThreads = 16;
-	std::cout << numberOfThreads << " Threads - " << std::endl;
-	{
-		Timer timer;
-
-		std::vector<std::thread> threads;
-		int rowsPerThread = std::ceil(winSize.y / static_cast<float>(numberOfThreads));
-
-		for (int i = 0; i < numberOfThreads; ++i) {
-			int startY = i * rowsPerThread;
-			int endY = std::min(startY + rowsPerThread, winSize.y);
-
-			threads.emplace_back(TracePixel, 0, startY, winSize.x - 1, endY - 1, winSize, &camera, &rayTracer, &_myFramework);
-		}
-
-		for (auto& thread : threads) {
-			thread.join();
-		}
-	}
-
-	int numberOfThreads2 = 24;
-	std::cout << numberOfThreads2 << " Threads - " << std::endl;
-	{
-		Timer timer;
-
-		std::vector<std::thread> threads;
-		int rowsPerThread = std::ceil(winSize.y / static_cast<float>(numberOfThreads2));
-
-		for (int i = 0; i < numberOfThreads2; ++i) {
-			int startY = i * rowsPerThread;
-			int endY = std::min(startY + rowsPerThread, winSize.y);
-
-			threads.emplace_back(TracePixel, 0, startY, winSize.x - 1, endY - 1, winSize, &camera, &rayTracer, &_myFramework);
-		}
-
-		for (auto& thread : threads) {
-			thread.join();
-		}
-	}
-
-	int numberOfThreads3 = 32;
-	std::cout << numberOfThreads3 << " Threads - " << std::endl;
-	{
-		Timer timer;
-
-		std::vector<std::thread> threads;
-		int rowsPerThread = std::ceil(winSize.y / static_cast<float>(numberOfThreads3));
-
-		for (int i = 0; i < numberOfThreads3; ++i) {
-			int startY = i * rowsPerThread;
-			int endY = std::min(startY + rowsPerThread, winSize.y);
-
-			threads.emplace_back(TracePixel, 0, startY, winSize.x - 1, endY - 1, winSize, &camera, &rayTracer, &_myFramework);
-		}
-
-		for (auto& thread : threads) {
-			thread.join();
-		}
-	}
+	RayTraceParallel(16, winSize, &camera, &rayTracer, &_myFramework);
 
 	// Pushes the framebuffer to OpenGL and renders to screen
 	// Also contains an event loop that keeps the window going until it's closed
