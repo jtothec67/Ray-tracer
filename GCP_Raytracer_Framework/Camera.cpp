@@ -8,16 +8,34 @@ Camera::Camera(glm::vec3 _position, glm::vec3 _rotation, glm::ivec2 _winSize)
 	position = _position;
 	rotation = _rotation;
 
-	viewMat = glm::translate(viewMat, _position);
-	viewMat = glm::rotate(viewMat, glm::radians(_rotation.x), glm::vec3(1, 0, 0));
-	viewMat = glm::rotate(viewMat, glm::radians(_rotation.y), glm::vec3(0, 1, 0));
-	viewMat = glm::rotate(viewMat, glm::radians(_rotation.z), glm::vec3(0, 0, 1));
+	viewMat = glm::translate(viewMat, position);
+	viewMat = glm::rotate(viewMat, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+	viewMat = glm::rotate(viewMat, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+	viewMat = glm::rotate(viewMat, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 
+	projectionMat = glm::perspective(glm::radians(60.f), (float)_winSize.x / (float)_winSize.y, 0.1f, 100.f);
+}
+
+void Camera::CalculateMatricies(glm::ivec2 _winSize)
+{
+	viewMat = glm::mat4{ 1.f };
+	viewMat = glm::translate(viewMat, position);
+	viewMat = glm::rotate(viewMat, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+	viewMat = glm::rotate(viewMat, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+	viewMat = glm::rotate(viewMat, glm::radians(rotation.z), glm::vec3(0, 0, 1));
+	
+	projectionMat = glm::mat4{ 1.f };
 	projectionMat = glm::perspective(glm::radians(60.f), (float)_winSize.x / (float)_winSize.y, 0.1f, 100.f);
 }
 
 Ray Camera::GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize)
 {
+	if (transformChanged)
+	{
+		CalculateMatricies(_windowSize);
+		transformChanged = false;
+	}
+
 	glm::vec2 fWinPos = glm::vec2((float)_windowPos.x, (float)_windowPos.y);
 	glm::vec2 fWinSize = glm::vec2((float)_windowSize.x, (float)_windowSize.y);
 

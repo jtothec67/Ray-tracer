@@ -35,9 +35,6 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 
 		for (auto rayObject : rayObjects)
 		{
-			if (rayObject == currentRayObject)
-				continue;
-
 			glm::vec3 hitPos;
 
 			glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.01f);

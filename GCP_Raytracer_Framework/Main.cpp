@@ -20,7 +20,7 @@ void TracePixel(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize,
 		{
 			if (x == _winSize.x) break;
 			Ray ray = _camera->GetRay(glm::ivec2(x, y), _winSize);
-			glm::vec3 colour = _rayTracer->TraceRay(ray, _camera->position);
+			glm::vec3 colour = _rayTracer->TraceRay(ray, _camera->GetPosition());
 			_myFramework->DrawPixel(glm::ivec2(x, y), colour);
 		}
 	}
@@ -28,9 +28,8 @@ void TracePixel(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize,
 
 void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
-	std::cout << _numOfThreads << " Threads - " << std::endl;
-
-	Timer timer;
+	//std::cout << _numOfThreads << " Rendering time: ";
+	//Timer timer;
 	
 	std::vector<std::thread> threads;
 	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numOfThreads));
@@ -92,11 +91,78 @@ int main(int argc, char* argv[])
 	RayObject* rayPlane2 = (RayObject*)&plane2;
 	rayTracer.rayObjects.push_back(rayPlane2);
 
-	RayTraceParallel(16, winSize, &camera, &rayTracer, &_myFramework);
 
-	// Pushes the framebuffer to OpenGL and renders to screen
-	// Also contains an event loop that keeps the window going until it's closed
-	_myFramework.ShowAndHold();
+	bool running = true;
+	while (running)
+	{
+		Timer timer;
+
+		SDL_Event e;
+		while (SDL_PollEvent(&e))
+		{
+			if (e.type == SDL_QUIT)
+			{
+				running = false;
+			}
+			if (e.type == SDL_KEYDOWN)
+			{
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_w:
+					camPos.z += 1;
+					camera.SetPosition(camPos);
+					break;
+				case SDLK_s:
+					camPos.z -= 1;
+					camera.SetPosition(camPos);
+					break;
+				case SDLK_a:
+					camPos.x += 1;
+					camera.SetPosition(camPos);
+					break;
+				case SDLK_d:
+					camPos.x -= 1;
+					camera.SetPosition(camPos);
+					break;
+				case SDLK_q:
+					camPos.y -= 1;
+					camera.SetPosition(camPos);
+					break;
+				case SDLK_e:
+					camPos.y += 1;
+					camera.SetPosition(camPos);
+					break;
+				case SDLK_UP:
+					camRot.x -= 1;
+					camera.SetRotation(camRot);
+					break;
+				case SDLK_DOWN:
+					camRot.x += 1;
+					camera.SetRotation(camRot);
+					break;
+				case SDLK_LEFT:
+					camRot.y -= 1;
+					camera.SetRotation(camRot);
+					break;
+				case SDLK_RIGHT:
+					camRot.y += 1;
+					camera.SetRotation(camRot);
+					break;
+				}
+			}
+		}
+
+		_myFramework.UpdateWindow(winSize.x, winSize.y);
+
+		RayTraceParallel(16, winSize, &camera, &rayTracer, &_myFramework);
+
+		_myFramework.Show();
+
+		//std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
+		std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
+		timer.Stop();
+	}
+	
 
 	return 0;
 }

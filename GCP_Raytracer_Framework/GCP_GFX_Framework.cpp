@@ -34,6 +34,14 @@ public:
 	// Binds the OpenGL texture for use with rendering it to screen
 	void BindGLTex();
 
+	void SetWindowSize(unsigned int w, unsigned int h)
+	{
+		_width = w; _height = h;
+		delete[] _localBuffer;
+		GenLocalFramebuffer();
+		GenGLFramebuffer();
+	}
+
 protected:
 	unsigned int _glTexName = 0;
 
@@ -510,10 +518,51 @@ void GCP_Framework::ShowAndHold()
 
 }
 
+void GCP_Framework::Show()
+{
+	// sanity check that Init() has been called
+	assert(_mainBuffer != nullptr);
+
+	// Show
+
+		// Specify the colour to clear the framebuffer to
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	// This writes the above colour to the colour part of the framebuffer
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Send offline framebuffer to the OpenGL texture
+	_mainBuffer->UpdateGL();
+
+	// Binds OpenGL Texture
+	glActiveTexture(GL_TEXTURE0);
+	_mainBuffer->BindGLTex();
+
+	// Call our drawing function to draw that triangle!
+	DrawVAOTris(_triangleVAO, 6, _shaderProgram);
+
+
+	// This tells the renderer to actually show its contents to the screen
+	SDL_GL_SwapWindow(_SDLwindow);
+}
+
+void GCP_Framework::UpdateWindow(int& _width, int& _height)
+{
+	int width = _width;
+	int height = _height;
+
+	SDL_GetWindowSize(_SDLwindow, &_width, &_height);
+	glViewport(0, 0, _width, _height);
+
+	_mainBuffer->SetWindowSize(_width, _height);
+}
+
 GCP_Framework::~GCP_Framework()
 {
 	delete _mainBuffer;
 
+	SDL_GL_DeleteContext(_SDLglcontext);
+	SDL_DestroyWindow(_SDLwindow);
+	SDL_Quit();
 	// TODO: currently doesn't clean up VAO or VBO
 }
 
