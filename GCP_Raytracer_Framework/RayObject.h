@@ -21,4 +21,6 @@ public:
 	glm::vec3 mPosition{ 0 };
 	glm::vec3 mAlbedo{ 0 };
 	float mShininess = 1;
+
+	bool mIsLight = false;
 };

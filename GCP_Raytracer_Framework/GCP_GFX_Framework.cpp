@@ -609,6 +609,7 @@ void Framebuffer::GenLocalFramebuffer()
 
 void Framebuffer::GenGLFramebuffer()
 {
+	glDeleteTextures(1, &_glTexName);
 
 	// Create OpenGL texture
 	glGenTextures(1, &_glTexName);

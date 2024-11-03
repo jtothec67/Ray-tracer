@@ -46,6 +46,31 @@ void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, R
 	}
 }
 
+void PlaceSpheresRandomly(RayTracer* _rayTracer, int _numOfSpheres, glm::vec3 _minPos, glm::vec3 _maxPos, float _minRadius, float _maxRadius, glm::vec3 _minColour, glm::vec3 _maxColour, float _minReflectivity, float _maxReflectivity)
+{
+	for (int i = 0; i < _numOfSpheres; ++i)
+	{
+		glm::vec3 pos = glm::vec3(
+			_minPos.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxPos.x - _minPos.x))),
+			_minPos.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxPos.y - _minPos.y))),
+			_minPos.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxPos.z - _minPos.z))
+				));
+
+		float radius = _minRadius + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxRadius - _minRadius)));
+		glm::vec3 colour = glm::vec3(
+			_minColour.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.x - _minColour.x))),
+			_minColour.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.y - _minColour.y))),
+			_minColour.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.z - _minColour.z))
+				));
+
+		float reflectivity = _minReflectivity + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxReflectivity - _minReflectivity)));
+
+		Sphere sphere(pos, radius, colour, reflectivity);
+		RayObject* raySphere = (RayObject*)&sphere;
+		_rayTracer->rayObjects.push_back(raySphere);
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	// Set window size
@@ -60,28 +85,40 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	glm::vec3 camPos = glm::vec3(0, 0, 0);
+	glm::vec3 camPos = glm::vec3(0, 0, -50);
 	glm::vec3 camRot = glm::vec3(0, 0, 0);
 
 	Camera camera(camPos, camRot, winSize);
 
-	std::vector<Light> lights;
-	Light light1(glm::vec3(-40, 0, -40), glm::vec3(1, 1, 1));
-	lights.push_back(light1);
-
-	Light light2(glm::vec3(20, 0, -50), glm::vec3(1, 1, 1));
-	lights.push_back(light2);
-
 	RayTracer rayTracer;
+
+	std::vector<Light> lights;
+
+	glm::vec3 lightPos1 = glm::vec3(-40, 0, -40);
+	Light light1(lightPos1, glm::vec3(1, 1, 1));
+	lights.push_back(light1);
+	Sphere lightSphere1(lightPos1, 2, glm::vec3(1, 1, 1), 0);
+	RayObject* rayLightSphere1 = (RayObject*)&lightSphere1;
+	rayLightSphere1->mIsLight = true;
+	rayTracer.rayObjects.push_back(rayLightSphere1);
+
+	glm::vec3 lightPos2 = glm::vec3(45, 10, -50);
+	Light light2(lightPos2, glm::vec3(1, 1, 1));
+	lights.push_back(light2);
+	Sphere lightSphere2(lightPos2, 2, glm::vec3(1, 1, 1), 0);
+	RayObject* rayLightSphere2 = (RayObject*)&lightSphere2;
+	rayLightSphere2->mIsLight = true;
+	rayTracer.rayObjects.push_back(rayLightSphere2);
+
 	rayTracer.SetLights(&lights);
 
-	Sphere sphere1(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
+	/*Sphere sphere1(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
 	RayObject* raySphere1 = (RayObject*)&sphere1;
 	rayTracer.rayObjects.push_back(raySphere1);
 
 	Sphere sphere2(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0), 1);
 	RayObject* raySphere2 = (RayObject*)&sphere2;
-	rayTracer.rayObjects.push_back(raySphere2);
+	rayTracer.rayObjects.push_back(raySphere2);*/
 
 	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), 0);
 	RayObject* rayPlane1 = (RayObject*)&plane1;
@@ -91,13 +128,64 @@ int main(int argc, char* argv[])
 	RayObject* rayPlane2 = (RayObject*)&plane2;
 	rayTracer.rayObjects.push_back(rayPlane2);
 
+	glm::vec3 minPos = glm::vec3(-40, -14, -50);
+	glm::vec3 maxPos = glm::vec3(40, 30, -50);
+
+	float minRadius = 1;
+	float maxRadius = 5;
+
+	glm::vec3 _minColour = glm::vec3(0, 0, 0);
+	glm::vec3 _maxColour = glm::vec3(1, 1, 1);
+
+	float _minReflectivity = 0;
+	float _maxReflectivity = 1;
+
+	srand(time(NULL));
+	for (int i = 0; i < 10; ++i)
+	{
+		glm::vec3 pos = glm::vec3(
+			minPos.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxPos.x - minPos.x))),
+			minPos.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxPos.y - minPos.y))),
+			minPos.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxPos.z - minPos.z))
+				));
+
+		float radius = minRadius + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxRadius - minRadius)));
+		glm::vec3 colour = glm::vec3(
+			_minColour.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.x - _minColour.x))),
+			_minColour.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.y - _minColour.y))),
+			_minColour.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.z - _minColour.z))
+				));
+
+		float reflectivity = _minReflectivity + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxReflectivity - _minReflectivity)));
+
+		Sphere* sphere = new Sphere(pos, radius, colour, reflectivity);
+		RayObject* raySphere = (RayObject*)sphere;
+		rayTracer.rayObjects.push_back(raySphere);
+	}
+
+	/*for (int i = 0; i < 2; i++)
+	{
+
+		Sphere sphere(glm::vec3((-10 + rand() % 21), 0, -50), 4, glm::vec3(1, 0, 0), 0);
+		RayObject* raySphere = (RayObject*)&sphere;
+		rayTracer.rayObjects.push_back(raySphere);
+
+		Sphere sphere2(glm::vec3((-10 + rand() % 21), 0, -50), 4, glm::vec3(1, 0, 0), 0);
+		RayObject* raySphere2 = (RayObject*)&sphere2;
+		rayTracer.rayObjects.push_back(raySphere2);
+
+		Sphere sphere3(glm::vec3((-10 + rand() % 21), 0, -50), 4, glm::vec3(1, 0, 0), 0);
+		RayObject* raySphere3 = (RayObject*)&sphere3;
+		rayTracer.rayObjects.push_back(raySphere3);
+	}*/
+
+	SDL_Event e;
 
 	bool running = true;
 	while (running)
 	{
 		Timer timer;
 
-		SDL_Event e;
 		while (SDL_PollEvent(&e))
 		{
 			if (e.type == SDL_QUIT)
