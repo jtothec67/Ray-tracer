@@ -8,6 +8,7 @@
 #include <string>
 #include <fstream>
 
+#include <GL/glew.h>
 #include <GLM/glm.hpp>
 
 // Forward declaration of internal utility class to handle framebuffer functionality
@@ -38,9 +39,12 @@ public:
 	// SDL is uninitialised, you are expected to exit the program
 	void ShowAndHold();
 	
-	void Show();
+	void DrawScreenTexture();
 
 	void UpdateWindow(int& _width, int& _height);
+	void ClearWindow() { glClearColor(0.0f, 0.0f, 0.0f, 0.0f); glClear(GL_COLOR_BUFFER_BIT); }
+
+	void SwapWindow() { SDL_GL_SwapWindow(_SDLwindow); }
 
 	SDL_Window* GetWindow() { return _SDLwindow; }
 	SDL_GLContext GetGLContext() { return _SDLglcontext; }

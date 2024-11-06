@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos)
+glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos, glm::vec3 _lightPos)
 {
 	if (mIsLight)
 		return mAlbedo;
 
 	//return CalulateDiffuseAndSpecular(_intersectPosition, _lightDir, _lightCol, _camPos);
-	return CalculatePBR(_intersectPosition, _lightDir, _lightCol, _camPos);
+	return CalculatePBR(_intersectPosition, _lightDir, _lightCol, _camPos, _lightPos);
 }
 
 glm::vec3 RayObject::CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos)
@@ -25,37 +25,103 @@ glm::vec3 RayObject::CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, gl
 	return diffuse + specular;
 }
 
-glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos)
+glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos, glm::vec3 _lightPos)
 {
-	glm::vec3 normal = NormalAtPosition(_intersectPosition);
-	glm::vec3 eyeDir = glm::normalize(_camPos - _intersectPosition);
+    /*glm::vec3 normal = NormalAtPosition(_intersectPosition);
+    glm::vec3 eyeDir = glm::normalize(_camPos - _intersectPosition);
 
-	glm::vec3 lightDir = glm::normalize(_lightDir);
+    glm::vec3 halfVec = glm::normalize(eyeDir + _lightDir);
 
-	glm::vec3 halfVector = glm::normalize(lightDir + eyeDir);
+    float distance = glm::length(_lightPos - _intersectPosition);
+    float attenuation = 1.0f / (distance * distance);
+    glm::vec3 radiance = _lightCol * attenuation;
 
-	float NdotL = glm::max(glm::dot(normal, lightDir), 0.0f);
-	float NdotH = glm::max(glm::dot(normal, halfVector), 0.0f);
-	float VdotH = glm::max(glm::dot(eyeDir, halfVector), 0.0f);
+    glm::vec3 F0 = glm::vec3(0.04f);
+    F0 = glm::mix(F0, mAlbedo, mMetallic);
+    glm::vec3 F = fresnelSchlick(glm::max(glm::dot(halfVec, eyeDir), 0.0f), F0);
 
-	float roughness = mRoughness;
-	float F0 = 0.04f;
-	glm::vec3 F = glm::vec3(F0) + (mAlbedo - glm::vec3(F0)) * glm::pow(1.0f - VdotH, 5.0f);
+    float NDF = DistributionGGX(normal, halfVec, mRoughness);
+    float G = GeometrySmith(normal, eyeDir, _lightDir, mRoughness);
 
-	float NDF = (roughness + 1) * glm::pow(NdotH, roughness) / (2.0f * 3.1415 * glm::pow(1.0f + (roughness * roughness - 1.0f) * NdotH * NdotH, 2.0f));
-	float G = glm::min(1.0f, glm::min(2.0f * NdotH * NdotL / VdotH, 2.0f * NdotH * glm::dot(normal, eyeDir) / VdotH));
+    glm::vec3 numerator = NDF * G * F;
+    float denominator = 4.0f * glm::max(glm::dot(normal, eyeDir), 0.0f) * glm::max(glm::dot(normal, _lightDir), 0.0f) + 0.0001f;
+    glm::vec3 specular = numerator / denominator;
 
-	glm::vec3 kS = F;
-	glm::vec3 kD = glm::vec3(1.0f) - kS;
-	kD *= 1.0f - mMetallic;
+    glm::vec3 kS = F;
+    glm::vec3 kD = glm::vec3(1.0f) - kS;
 
-	glm::vec3 numerator = NDF * G * F;
-	float denominator = 4.0f * glm::max(4.0f * NdotL * NdotH, 0.001f);
-	glm::vec3 specular = numerator / denominator;
+    kD *= 1.0f - mMetallic;
 
-	glm::vec3 ambient = glm::vec3(0.03f) * mAlbedo * _lightCol;
+    float NdotL = glm::max(glm::dot(normal, _lightDir), 0.0f);
+    glm::vec3 Lo = (kD * mAlbedo / 3.1415f + specular) * radiance * NdotL;
 
-	glm::vec3 colour = (kD * mAlbedo / 3.1415f) + specular;
+    return Lo;*/
 
-	return (colour * NdotL + ambient) * _lightCol;
+    glm::vec3 normal = NormalAtPosition(_intersectPosition);
+    glm::vec3 eyeDir = glm::normalize(_camPos - _intersectPosition);
+
+    glm::vec3 lightDir = glm::normalize(_lightDir);
+
+    glm::vec3 halfVector = glm::normalize(lightDir + eyeDir);
+
+    float NdotL = glm::max(glm::dot(normal, lightDir), 0.0f);
+    float NdotH = glm::max(glm::dot(normal, halfVector), 0.0f);
+    float VdotH = glm::max(glm::dot(eyeDir, halfVector), 0.0f);
+
+    float roughness = mRoughness;
+    float F0 = 0.04f;
+    glm::vec3 F = glm::vec3(F0) + (mAlbedo - glm::vec3(F0)) * glm::pow(1.0f - VdotH, 5.0f);
+
+    float NDF = (roughness + 1) * glm::pow(NdotH, roughness) / (2.0f * 3.1415 * glm::pow(1.0f + (roughness * roughness - 1.0f) * NdotH * NdotH, 2.0f));
+    float G = glm::min(1.0f, glm::min(2.0f * NdotH * NdotL / VdotH, 2.0f * NdotH * glm::dot(normal, eyeDir) / VdotH));
+
+    glm::vec3 kS = F;
+    glm::vec3 kD = glm::vec3(1.0f) - kS;
+    kD *= 1.0f - mMetallic;
+
+    glm::vec3 numerator = NDF * G * F;
+    float denominator = 4.0f * glm::max(4.0f * NdotL * NdotH, 0.001f);
+    glm::vec3 specular = numerator / denominator;
+
+    glm::vec3 ambient = glm::vec3(0.03f) * mAlbedo * _lightCol;
+
+    glm::vec3 colour = (kD * mAlbedo / 3.1415f) + specular;
+
+    return (colour * NdotL + ambient) * _lightCol;
+}
+
+glm::vec3 RayObject::fresnelSchlick(float cosTheta, const glm::vec3& F0) {
+    return F0 + (1.0f - F0) * glm::pow(glm::clamp(1.0f - cosTheta, 0.0f, 1.0f), 5.0f);
+}
+
+float RayObject::DistributionGGX(const glm::vec3& N, const glm::vec3& H, float roughness) {
+    float a = roughness * roughness;
+    float a2 = a * a;
+    float NdotH = glm::max(glm::dot(N, H), 0.0f);
+    float NdotH2 = NdotH * NdotH;
+
+    float num = a2;
+    float denom = (NdotH2 * (a2 - 1.0f) + 1.0f);
+    denom = 3.1415 * denom * denom;
+
+    return num / denom;
+}
+
+float RayObject::GeometrySchlickGGX(float NdotV, float roughness) {
+    float r = (roughness + 1.0f);
+    float k = (r * r) / 8.0f;
+
+    float num = NdotV;
+    float denom = NdotV * (1.0f - k) + k;
+
+    return num / denom;
+}
+
+float RayObject::GeometrySmith(const glm::vec3& N, const glm::vec3& V, const glm::vec3& L, float roughness) {
+    float NdotV = glm::max(glm::dot(N, V), 0.0f);
+    float NdotL = glm::max(glm::dot(N, L), 0.0f);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+    return ggx1 * ggx2;
 }

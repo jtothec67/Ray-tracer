@@ -88,12 +88,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../SDKs/Include; ../SDKs/IMGUI</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>SDKs/Include; SDKs/IMGUI</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\SDKs\Lib86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>SDKs\Lib86</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -105,14 +105,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../SDKs/Include; ../SDKs/IMGUI</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>SDKs/Include; SDKs/IMGUI</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\SDKs\Lib86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>SDKs\Lib86</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -122,12 +122,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../SDKs/Include; ../SDKs/IMGUI</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>SDKs/Include; SDKs/IMGUI</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\SDKs\Lib64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>SDKs\Lib64</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -139,14 +139,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../SDKs/Include; ../SDKs/IMGUI</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>SDKs/Include; SDKs/IMGUI</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\SDKs\Lib64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>SDKs\Lib64</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -158,6 +158,13 @@
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="RayObject.cpp" />
     <ClCompile Include="RayTracer.cpp" />
+    <ClCompile Include="SDKs\IMGUI\imgui.cpp" />
+    <ClCompile Include="SDKs\IMGUI\imgui_draw.cpp" />
+    <ClCompile Include="SDKs\IMGUI\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="SDKs\IMGUI\imgui_impl_sdl.cpp" />
+    <ClCompile Include="SDKs\IMGUI\imgui_impl_sdlrenderer.cpp" />
+    <ClCompile Include="SDKs\IMGUI\imgui_tables.cpp" />
+    <ClCompile Include="SDKs\IMGUI\imgui_widgets.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
@@ -173,6 +180,16 @@
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayObject.h" />
     <ClInclude Include="RayTracer.h" />
+    <ClInclude Include="SDKs\IMGUI\imconfig.h" />
+    <ClInclude Include="SDKs\IMGUI\imgui.h" />
+    <ClInclude Include="SDKs\IMGUI\imgui_impl_opengl3.h" />
+    <ClInclude Include="SDKs\IMGUI\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="SDKs\IMGUI\imgui_impl_sdl.h" />
+    <ClInclude Include="SDKs\IMGUI\imgui_impl_sdlrenderer.h" />
+    <ClInclude Include="SDKs\IMGUI\imgui_internal.h" />
+    <ClInclude Include="SDKs\IMGUI\imstb_rectpack.h" />
+    <ClInclude Include="SDKs\IMGUI\imstb_textedit.h" />
+    <ClInclude Include="SDKs\IMGUI\imstb_truetype.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>

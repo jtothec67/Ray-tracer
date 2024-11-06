@@ -1,8 +1,4 @@
-
 #include "GCP_GFX_Framework.h"
-
-
-#include <GL/glew.h>
 
 // Handles local (CPU side) and OpenGL framebuffer functionality
 class Framebuffer
@@ -518,31 +514,24 @@ void GCP_Framework::ShowAndHold()
 
 }
 
-void GCP_Framework::Show()
+void GCP_Framework::DrawScreenTexture()
 {
 	// sanity check that Init() has been called
-	assert(_mainBuffer != nullptr);
-
-	// Show
-
-		// Specify the colour to clear the framebuffer to
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	// This writes the above colour to the colour part of the framebuffer
-	glClear(GL_COLOR_BUFFER_BIT);
+	//assert(_mainBuffer != nullptr);
 
 	// Send offline framebuffer to the OpenGL texture
 	_mainBuffer->UpdateGL();
 
 	// Binds OpenGL Texture
-	glActiveTexture(GL_TEXTURE0);
-	_mainBuffer->BindGLTex();
+	//glActiveTexture(GL_TEXTURE0);
+	//_mainBuffer->BindGLTex();
 
 	// Call our drawing function to draw that triangle!
 	DrawVAOTris(_triangleVAO, 6, _shaderProgram);
 
 
 	// This tells the renderer to actually show its contents to the screen
-	SDL_GL_SwapWindow(_SDLwindow);
+	
 }
 
 void GCP_Framework::UpdateWindow(int& _width, int& _height)

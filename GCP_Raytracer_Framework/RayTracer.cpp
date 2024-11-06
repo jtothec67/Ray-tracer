@@ -31,7 +31,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 
 	for (auto &light : *mLights)
 	{
-		glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos);
+		glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos, light.position);
 
 		for (auto rayObject : rayObjects)
 		{
@@ -53,6 +53,12 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 
 		finalPixelCol += thisPixelCol;
 	}
+
+	/*glm::vec3 ambientCol = glm::vec3(1.f, 1.f, 1.f) * currentRayObject->mAlbedo * currentRayObject->mAmbientOcclusion;
+	finalPixelCol += ambientCol;
+
+	finalPixelCol = finalPixelCol / (finalPixelCol + glm::vec3(1.f));
+	finalPixelCol = glm::pow(finalPixelCol, glm::vec3(1.f / 2.2f));*/
 
 	return finalPixelCol;
 }

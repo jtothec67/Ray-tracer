@@ -184,19 +184,15 @@ int main(int argc, char* argv[])
 	}*/
 
 	// Setting up the GUI system
-	//IMGUI_CHECKVERSION();
-	//ImGui::CreateContext();
-	//ImGuiIO& io = ImGui::GetIO(); (void)io;
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-	//// Set a dark theme
-	//ImGui::StyleColorsDark();
+	ImGui::StyleColorsDark();
 
-	//// The GUI system is built with an OpenGL back-end, so need to connect it up
-	//// Also tell it which shader language version to target
-	//// #version 130 corresponds to OpenGL 3.0, so should be fine for us
-	//const char* glslVersion = "#version 130";
-	//ImGui_ImplSDL2_InitForOpenGL(_myFramework.GetWindow(), _myFramework.GetGLContext());
-	//ImGui_ImplOpenGL3_Init(glslVersion);
+	const char* glslVersion = "#version 430";
+	ImGui_ImplSDL2_InitForOpenGL(_myFramework.GetWindow(), _myFramework.GetGLContext());
+	ImGui_ImplOpenGL3_Init(glslVersion);
 
 	SDL_Event e;
 
@@ -207,6 +203,8 @@ int main(int argc, char* argv[])
 
 		while (SDL_PollEvent(&e))
 		{
+			ImGui_ImplSDL2_ProcessEvent(&e);
+
 			if (e.type == SDL_QUIT)
 			{
 				running = false;
@@ -261,15 +259,69 @@ int main(int argc, char* argv[])
 
 		_myFramework.UpdateWindow(winSize.x, winSize.y);
 
+		_myFramework.ClearWindow();
+
 		RayTraceParallel(16, winSize, &camera, &rayTracer, &_myFramework);
 
-		_myFramework.Show();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame();
+		ImGui::NewFrame();
 
-		std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
-		//std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
+		ImGui::Begin("Material Controls");
+		ImGui::Text("Sphere 1");
+
+		glm::vec3 albedo = raySphere1->mAlbedo;
+		ImGui::ColorEdit3("Albedo", &albedo[0]);
+		raySphere1->mAlbedo = albedo;
+
+        float metallic = raySphere1->mMetallic;
+		ImGui::SliderFloat("Reflectivity", &metallic, 0.0f, 1.0f);
+		raySphere1->mMetallic = metallic;
+
+		float roughness = raySphere1->mRoughness;
+		ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
+		raySphere1->mRoughness = roughness;
+
+		float ambientOcclusion = raySphere1->mAmbientOcclusion;
+		ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion, 0.0f, 1.0f);
+		raySphere1->mAmbientOcclusion = ambientOcclusion;
+
+		ImGui::Text("Sphere 2");
+
+		glm::vec3 albedo2 = raySphere2->mAlbedo;
+		ImGui::ColorEdit3("Albedo", &albedo2[0]);
+		raySphere2->mAlbedo = albedo2;
+
+		float metallic2 = raySphere2->mMetallic;
+		ImGui::SliderFloat("Reflectivity", &metallic2, 0.0f, 1.0f);
+		raySphere2->mMetallic = metallic2;
+
+		float roughness2 = raySphere2->mRoughness;
+		ImGui::SliderFloat("Roughness", &roughness2, 0.0f, 1.0f);
+		raySphere2->mRoughness = roughness2;
+
+		float ambientOcclusion2 = raySphere2->mAmbientOcclusion;
+		ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion2, 0.0f, 1.0f);
+		raySphere2->mAmbientOcclusion = ambientOcclusion2;
+
+		ImGui::End();
+
+		_myFramework.DrawScreenTexture();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		_myFramework.SwapWindow();
+
+		//std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
+		std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
 		timer.Stop();
 	}
-	
+
+	// Shut down GUI system
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 
 	return 0;
 }
