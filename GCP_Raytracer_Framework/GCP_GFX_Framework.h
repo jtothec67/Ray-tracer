@@ -42,6 +42,9 @@ public:
 
 	void UpdateWindow(int& _width, int& _height);
 
+	SDL_Window* GetWindow() { return _SDLwindow; }
+	SDL_GLContext GetGLContext() { return _SDLglcontext; }
+
 protected:
 
 	// Internal variables

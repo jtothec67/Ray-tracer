@@ -8,6 +8,10 @@
 #include "Light.h"
 #include "Timer.h"
 
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
+
 #include <vector>
 #include <thread>
 
@@ -85,7 +89,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	glm::vec3 camPos = glm::vec3(0, 0, -50);
+	glm::vec3 camPos = glm::vec3(0, 0, 0);
 	glm::vec3 camRot = glm::vec3(0, 0, 0);
 
 	Camera camera(camPos, camRot, winSize);
@@ -112,13 +116,13 @@ int main(int argc, char* argv[])
 
 	rayTracer.SetLights(&lights);
 
-	/*Sphere sphere1(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
+	Sphere sphere1(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
 	RayObject* raySphere1 = (RayObject*)&sphere1;
 	rayTracer.rayObjects.push_back(raySphere1);
 
 	Sphere sphere2(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0), 1);
 	RayObject* raySphere2 = (RayObject*)&sphere2;
-	rayTracer.rayObjects.push_back(raySphere2);*/
+	rayTracer.rayObjects.push_back(raySphere2);
 
 	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), 0);
 	RayObject* rayPlane1 = (RayObject*)&plane1;
@@ -160,7 +164,7 @@ int main(int argc, char* argv[])
 
 		Sphere* sphere = new Sphere(pos, radius, colour, reflectivity);
 		RayObject* raySphere = (RayObject*)sphere;
-		rayTracer.rayObjects.push_back(raySphere);
+		//rayTracer.rayObjects.push_back(raySphere);
 	}
 
 	/*for (int i = 0; i < 2; i++)
@@ -178,6 +182,21 @@ int main(int argc, char* argv[])
 		RayObject* raySphere3 = (RayObject*)&sphere3;
 		rayTracer.rayObjects.push_back(raySphere3);
 	}*/
+
+	// Setting up the GUI system
+	//IMGUI_CHECKVERSION();
+	//ImGui::CreateContext();
+	//ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	//// Set a dark theme
+	//ImGui::StyleColorsDark();
+
+	//// The GUI system is built with an OpenGL back-end, so need to connect it up
+	//// Also tell it which shader language version to target
+	//// #version 130 corresponds to OpenGL 3.0, so should be fine for us
+	//const char* glslVersion = "#version 130";
+	//ImGui_ImplSDL2_InitForOpenGL(_myFramework.GetWindow(), _myFramework.GetGLContext());
+	//ImGui_ImplOpenGL3_Init(glslVersion);
 
 	SDL_Event e;
 
@@ -246,8 +265,8 @@ int main(int argc, char* argv[])
 
 		_myFramework.Show();
 
-		//std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
-		std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
+		std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
+		//std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
 		timer.Stop();
 	}
 	
