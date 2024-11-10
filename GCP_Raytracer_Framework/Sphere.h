@@ -5,7 +5,7 @@
 
 #include <GLM/glm.hpp>
 
-class Sphere : RayObject
+class Sphere : public RayObject
 {
 public:
 	Sphere(glm::vec3 _position, float _radius);

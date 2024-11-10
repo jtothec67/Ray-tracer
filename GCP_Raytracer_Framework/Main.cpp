@@ -116,12 +116,14 @@ int main(int argc, char* argv[])
 
 	rayTracer.SetLights(&lights);
 
-	Sphere sphere1(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
-	RayObject* raySphere1 = (RayObject*)&sphere1;
+	Sphere* sphere1 = new Sphere(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
+	sphere1->mMetallic = 1;
+	RayObject* raySphere1 = (RayObject*)sphere1;
 	rayTracer.rayObjects.push_back(raySphere1);
 
-	Sphere sphere2(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0), 1);
-	RayObject* raySphere2 = (RayObject*)&sphere2;
+	Sphere* sphere2 = new Sphere(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0), 1);
+	sphere2->mMetallic = 0;
+	RayObject* raySphere2 = (RayObject*)sphere2;
 	rayTracer.rayObjects.push_back(raySphere2);
 
 	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), 0);
@@ -267,42 +269,48 @@ int main(int argc, char* argv[])
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 
+		std::cout << "Address of mMetallic sphere1: " << &sphere1->mMetallic << std::endl;
+		std::cout << "Address of mMetallic sphere2: " << &sphere2->mMetallic << std::endl;
+
+		std::cout << "Value of mMetallic sphere1: " << sphere1->mMetallic << std::endl;
+		std::cout << "Value of mMetallic sphere2: " << sphere2->mMetallic << std::endl;
+
 		ImGui::Begin("Material Controls");
 		ImGui::Text("Sphere 1");
 
-		glm::vec3 albedo = raySphere1->mAlbedo;
-		ImGui::ColorEdit3("Albedo", &albedo[0]);
-		raySphere1->mAlbedo = albedo;
+		glm::vec3 albedo1 = sphere1->mAlbedo;
+		ImGui::ColorEdit3("Albedo", &albedo1[0]);
+		sphere1->mAlbedo = albedo1;
 
-        float metallic = raySphere1->mMetallic;
-		ImGui::SliderFloat("Reflectivity", &metallic, 0.0f, 1.0f);
-		raySphere1->mMetallic = metallic;
+        float metallic1 = sphere1->mMetallic;
+		ImGui::SliderFloat("Reflectivity", &metallic1, 0.0f, 1.0f);
+		sphere1->mMetallic = metallic1;
 
-		float roughness = raySphere1->mRoughness;
-		ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
-		raySphere1->mRoughness = roughness;
+		float roughness1 = sphere1->mRoughness;
+		ImGui::SliderFloat("Roughness", &roughness1, 0.0f, 1.0f);
+		sphere1->mRoughness = roughness1;
 
-		float ambientOcclusion = raySphere1->mAmbientOcclusion;
-		ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion, 0.0f, 1.0f);
-		raySphere1->mAmbientOcclusion = ambientOcclusion;
+		float ambientOcclusion1 = sphere1->mAmbientOcclusion;
+		ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion1, 0.0f, 1.0f);
+		sphere1->mAmbientOcclusion = ambientOcclusion1;
 
 		ImGui::Text("Sphere 2");
 
-		glm::vec3 albedo2 = raySphere2->mAlbedo;
+		glm::vec3 albedo2 = sphere2->mAlbedo;
 		ImGui::ColorEdit3("Albedo", &albedo2[0]);
-		raySphere2->mAlbedo = albedo2;
+		sphere2->mAlbedo = albedo2;
 
-		float metallic2 = raySphere2->mMetallic;
+		float metallic2 = sphere2->mMetallic;
 		ImGui::SliderFloat("Reflectivity", &metallic2, 0.0f, 1.0f);
-		raySphere2->mMetallic = metallic2;
+		sphere2->mMetallic = metallic2;
 
-		float roughness2 = raySphere2->mRoughness;
+		float roughness2 = sphere2->mRoughness;
 		ImGui::SliderFloat("Roughness", &roughness2, 0.0f, 1.0f);
-		raySphere2->mRoughness = roughness2;
+		sphere2->mRoughness = roughness2;
 
-		float ambientOcclusion2 = raySphere2->mAmbientOcclusion;
+		float ambientOcclusion2 = sphere2->mAmbientOcclusion;
 		ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion2, 0.0f, 1.0f);
-		raySphere2->mAmbientOcclusion = ambientOcclusion2;
+		sphere2->mAmbientOcclusion = ambientOcclusion2;
 
 		ImGui::End();
 
