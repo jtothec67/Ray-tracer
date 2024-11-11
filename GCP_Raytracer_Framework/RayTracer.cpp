@@ -54,11 +54,5 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 		finalPixelCol += thisPixelCol;
 	}
 
-	/*glm::vec3 ambientCol = glm::vec3(1.f, 1.f, 1.f) * currentRayObject->mAlbedo * currentRayObject->mAmbientOcclusion;
-	finalPixelCol += ambientCol;
-
-	finalPixelCol = finalPixelCol / (finalPixelCol + glm::vec3(1.f));
-	finalPixelCol = glm::pow(finalPixelCol, glm::vec3(1.f / 2.2f));*/
-
 	return finalPixelCol;
 }

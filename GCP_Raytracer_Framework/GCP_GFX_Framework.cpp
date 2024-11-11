@@ -346,7 +346,6 @@ bool GCP_Framework::Init( glm::ivec2 screenSize )
 	}
 
 
-
 	// This is how we set the context profile
 	// We need to do this through SDL, so that it can set up the OpenGL drawing context that matches this
 	// (of course in reality we have no guarantee this will be available and should provide fallback methods if it's not!)
@@ -406,6 +405,7 @@ bool GCP_Framework::Init( glm::ivec2 screenSize )
 		return false;
 	}
 
+	SDL_GL_SetSwapInterval(0);
 
 
 	// Create the vertex array object for our triangle

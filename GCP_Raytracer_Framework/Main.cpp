@@ -269,12 +269,6 @@ int main(int argc, char* argv[])
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 
-		std::cout << "Address of mMetallic sphere1: " << &sphere1->mMetallic << std::endl;
-		std::cout << "Address of mMetallic sphere2: " << &sphere2->mMetallic << std::endl;
-
-		std::cout << "Value of mMetallic sphere1: " << sphere1->mMetallic << std::endl;
-		std::cout << "Value of mMetallic sphere2: " << sphere2->mMetallic << std::endl;
-
 		ImGui::Begin("Material Controls");
 		ImGui::Text("Sphere 1");
 
@@ -297,19 +291,19 @@ int main(int argc, char* argv[])
 		ImGui::Text("Sphere 2");
 
 		glm::vec3 albedo2 = sphere2->mAlbedo;
-		ImGui::ColorEdit3("Albedo", &albedo2[0]);
+		ImGui::ColorEdit3("Albedo2", &albedo2[0]);
 		sphere2->mAlbedo = albedo2;
 
 		float metallic2 = sphere2->mMetallic;
-		ImGui::SliderFloat("Reflectivity", &metallic2, 0.0f, 1.0f);
+		ImGui::SliderFloat("Reflectivity2", &metallic2, 0.0f, 1.0f);
 		sphere2->mMetallic = metallic2;
 
 		float roughness2 = sphere2->mRoughness;
-		ImGui::SliderFloat("Roughness", &roughness2, 0.0f, 1.0f);
+		ImGui::SliderFloat("Roughness2", &roughness2, 0.0f, 1.0f);
 		sphere2->mRoughness = roughness2;
 
 		float ambientOcclusion2 = sphere2->mAmbientOcclusion;
-		ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion2, 0.0f, 1.0f);
+		ImGui::SliderFloat("Ambient Occlusion2", &ambientOcclusion2, 0.0f, 1.0f);
 		sphere2->mAmbientOcclusion = ambientOcclusion2;
 
 		ImGui::End();
