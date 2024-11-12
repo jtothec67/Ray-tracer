@@ -35,4 +35,6 @@ public:
 	float mAmbientOcclusion = 0.0f;
 
 	bool mIsLight = false;
+
+	bool mPBR = true;
 };

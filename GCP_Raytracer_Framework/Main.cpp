@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 	rayTracer.SetLights(&lights);
 
 	Sphere* sphere1 = new Sphere(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
-	sphere1->mMetallic = 1;
+	sphere1->mMetallic = 0.6f;
 	RayObject* raySphere1 = (RayObject*)sphere1;
 	rayTracer.rayObjects.push_back(raySphere1);
 
@@ -127,10 +127,14 @@ int main(int argc, char* argv[])
 	rayTracer.rayObjects.push_back(raySphere2);
 
 	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), 0);
+	plane1.mMetallic = 0;
+	plane1.mRoughness = 1;
 	RayObject* rayPlane1 = (RayObject*)&plane1;
 	rayTracer.rayObjects.push_back(rayPlane1);
 
 	Plane plane2(glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), 0);
+	plane2.mMetallic = 0;
+	plane2.mRoughness = 1;
 	RayObject* rayPlane2 = (RayObject*)&plane2;
 	rayTracer.rayObjects.push_back(rayPlane2);
 
@@ -255,6 +259,11 @@ int main(int argc, char* argv[])
 					camRot.y += 1;
 					camera.SetRotation(camRot);
 					break;
+				case SDLK_p:
+					for (auto rayObject : rayTracer.rayObjects)
+					{
+						rayObject->mPBR = !rayObject->mPBR;
+					}
 				}
 			}
 		}
@@ -265,48 +274,52 @@ int main(int argc, char* argv[])
 
 		RayTraceParallel(16, winSize, &camera, &rayTracer, &_myFramework);
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL2_NewFrame();
-		ImGui::NewFrame();
+		{
 
-		ImGui::Begin("Material Controls");
-		ImGui::Text("Sphere 1");
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplSDL2_NewFrame();
+			ImGui::NewFrame();
 
-		glm::vec3 albedo1 = sphere1->mAlbedo;
-		ImGui::ColorEdit3("Albedo", &albedo1[0]);
-		sphere1->mAlbedo = albedo1;
+			ImGui::Begin("Material Controls");
+			ImGui::Text("Sphere 1");
 
-        float metallic1 = sphere1->mMetallic;
-		ImGui::SliderFloat("Reflectivity", &metallic1, 0.0f, 1.0f);
-		sphere1->mMetallic = metallic1;
+			glm::vec3 albedo1 = sphere1->mAlbedo;
+			ImGui::ColorEdit3("Albedo", &albedo1[0]);
+			sphere1->mAlbedo = albedo1;
 
-		float roughness1 = sphere1->mRoughness;
-		ImGui::SliderFloat("Roughness", &roughness1, 0.0f, 1.0f);
-		sphere1->mRoughness = roughness1;
+			float metallic1 = sphere1->mMetallic;
+			ImGui::SliderFloat("Metallic", &metallic1, 0.0f, 1.0f);
+			sphere1->mMetallic = metallic1;
 
-		float ambientOcclusion1 = sphere1->mAmbientOcclusion;
-		ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion1, 0.0f, 1.0f);
-		sphere1->mAmbientOcclusion = ambientOcclusion1;
+			float roughness1 = sphere1->mRoughness;
+			ImGui::SliderFloat("Roughness", &roughness1, 0.0f, 1.0f);
+			sphere1->mRoughness = roughness1;
 
-		ImGui::Text("Sphere 2");
+			float ambientOcclusion1 = sphere1->mAmbientOcclusion;
+			ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion1, 0.0f, 1.0f);
+			sphere1->mAmbientOcclusion = ambientOcclusion1;
 
-		glm::vec3 albedo2 = sphere2->mAlbedo;
-		ImGui::ColorEdit3("Albedo2", &albedo2[0]);
-		sphere2->mAlbedo = albedo2;
+			ImGui::Text("Sphere 2");
 
-		float metallic2 = sphere2->mMetallic;
-		ImGui::SliderFloat("Reflectivity2", &metallic2, 0.0f, 1.0f);
-		sphere2->mMetallic = metallic2;
+			glm::vec3 albedo2 = sphere2->mAlbedo;
+			ImGui::ColorEdit3("Albedo2", &albedo2[0]);
+			sphere2->mAlbedo = albedo2;
 
-		float roughness2 = sphere2->mRoughness;
-		ImGui::SliderFloat("Roughness2", &roughness2, 0.0f, 1.0f);
-		sphere2->mRoughness = roughness2;
+			float metallic2 = sphere2->mMetallic;
+			ImGui::SliderFloat("Metallic2", &metallic2, 0.0f, 1.0f);
+			sphere2->mMetallic = metallic2;
 
-		float ambientOcclusion2 = sphere2->mAmbientOcclusion;
-		ImGui::SliderFloat("Ambient Occlusion2", &ambientOcclusion2, 0.0f, 1.0f);
-		sphere2->mAmbientOcclusion = ambientOcclusion2;
+			float roughness2 = sphere2->mRoughness;
+			ImGui::SliderFloat("Roughness2", &roughness2, 0.0f, 1.0f);
+			sphere2->mRoughness = roughness2;
 
-		ImGui::End();
+			float ambientOcclusion2 = sphere2->mAmbientOcclusion;
+			ImGui::SliderFloat("Ambient Occlusion2", &ambientOcclusion2, 0.0f, 1.0f);
+			sphere2->mAmbientOcclusion = ambientOcclusion2;
+
+			ImGui::End();
+
+		}
 
 		_myFramework.DrawScreenTexture();
 

@@ -2,7 +2,7 @@
 
 #include "RayObject.h"
 
-class Plane : RayObject
+class Plane : public RayObject
 {
 public:
 	Plane(glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo, float _shininess);

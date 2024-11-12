@@ -7,8 +7,11 @@ glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _li
 	if (mIsLight)
 		return mAlbedo;
 
-	//return CalulateDiffuseAndSpecular(_intersectPosition, _lightDir, _lightCol, _camPos);
-	return CalculatePBR(_intersectPosition, _lightDir, _lightCol, _camPos, _lightPos);
+    if (mPBR)
+        return CalculatePBR(_intersectPosition, _lightDir, _lightCol, _camPos, _lightPos);
+    else
+        return CalulateDiffuseAndSpecular(_intersectPosition, _lightDir, _lightCol, _camPos);
+	
 }
 
 glm::vec3 RayObject::CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos)
