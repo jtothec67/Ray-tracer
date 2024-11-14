@@ -47,7 +47,8 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 				if (glm::length(hitPos - currentHitPos) > glm::length(light.position - currentHitPos))
 					continue;
 
-				thisPixelCol = glm::vec3(0, 0, 0);
+				//thisPixelCol = glm::vec3(0, 0, 0);
+				thisPixelCol = glm::vec3(0.03f) * currentRayObject->mAlbedo * currentRayObject->mAmbientOcclusion;
 			}
 		}
 

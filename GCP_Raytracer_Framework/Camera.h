@@ -21,6 +21,10 @@ public:
 	void SetRotation(glm::vec3 _rotation) { transformChanged = true; rotation = _rotation; }
 	glm::vec3 GetRotation() { return rotation; }
 
+	glm::vec3 GetForward();
+	glm::vec3 GetRight();
+	glm::vec3 GetUp();
+
 	glm::vec3 position{ 0.f };
 	glm::vec3 rotation{ 0.f };
 

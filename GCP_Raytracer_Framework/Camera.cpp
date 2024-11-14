@@ -70,3 +70,21 @@ Ray Camera::GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize)
 
 	return ray;
 }
+
+glm::vec3 Camera::GetForward()
+{
+	glm::vec3 forward = glm::vec3(viewMat[0][2], viewMat[1][2], viewMat[2][2]);
+	return glm::normalize(forward);
+}
+
+glm::vec3 Camera::GetRight()
+{
+	glm::vec3 right = glm::vec3(viewMat[0][0], viewMat[1][0], viewMat[2][0]);
+	return glm::normalize(right);
+}
+
+glm::vec3 Camera::GetUp()
+{
+	glm::vec3 up = glm::vec3(viewMat[0][1], viewMat[1][1], viewMat[2][1]);
+	return glm::normalize(up);
+}

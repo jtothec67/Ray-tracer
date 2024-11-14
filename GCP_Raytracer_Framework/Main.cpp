@@ -202,10 +202,22 @@ int main(int argc, char* argv[])
 
 	SDL_Event e;
 
+	bool restartTimer = true;
+	Timer averageFrameTimer;
+
+	int frames = 0;
+
 	bool running = true;
 	while (running)
 	{
+		frames++;
 		Timer timer;
+
+		if (restartTimer)
+		{
+			averageFrameTimer.Start();
+			restartTimer = false;
+		}
 
 		while (SDL_PollEvent(&e))
 		{
@@ -220,19 +232,19 @@ int main(int argc, char* argv[])
 				switch (e.key.keysym.sym)
 				{
 				case SDLK_w:
-					camPos.z += 1;
+					camPos += camera.GetForward();
 					camera.SetPosition(camPos);
 					break;
 				case SDLK_s:
-					camPos.z -= 1;
+					camPos -= camera.GetForward();
 					camera.SetPosition(camPos);
 					break;
 				case SDLK_a:
-					camPos.x += 1;
+					camPos += camera.GetRight();
 					camera.SetPosition(camPos);
 					break;
 				case SDLK_d:
-					camPos.x -= 1;
+					camPos -= camera.GetRight();
 					camera.SetPosition(camPos);
 					break;
 				case SDLK_q:
@@ -329,8 +341,16 @@ int main(int argc, char* argv[])
 		_myFramework.SwapWindow();
 
 		//std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
-		std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
+		//std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
 		timer.Stop();
+
+		if (averageFrameTimer.GetElapsedMilliseconds() > 1000)
+		{
+			std::cout << "Average FPS: " << frames << std::endl;
+			averageFrameTimer.Stop();
+			restartTimer = true;
+			frames = 0;
+		}
 	}
 
 	// Shut down GUI system
