@@ -1,6 +1,11 @@
 #include "RayTracer.h"
 #include <iostream>
 
+RayTracer::RayTracer()
+{
+	GenerateHemisphereSamples(mNumAOSamples);
+}
+
 glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 {
 	glm::vec3 currentHitPos;
@@ -66,10 +71,8 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 	if (mAmbientOcclusion)
 	{
 		// Add ambient occlusion
-
-		glm::vec3 normal = currentRayObject->NormalAtPosition(currentHitPos);
-		float ao = ComputeAO(currentHitPos, normal, mNumAOSamples) * mAOStrength;
-		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo * ao;
+		float ao = ComputeAO(currentHitPos, currentRayObject->NormalAtPosition(currentHitPos));
+		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo * (1.0f - mAOStrength + ao * mAOStrength);
 	}
 	else
 	{
@@ -80,10 +83,10 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 	return finalPixelCol;
 }
 
-std::vector<glm::vec3> RayTracer::GenerateHemisphereSamples(int _numSamples)
+void RayTracer::GenerateHemisphereSamples(int _numSamples)
 {
-	std::vector<glm::vec3> samples;
-	samples.reserve(_numSamples);
+	mHemisphereSamples.clear();
+	mHemisphereSamples.reserve(_numSamples);
 
 	for (int i = 0; i < _numSamples; ++i)
 	{
@@ -96,18 +99,24 @@ std::vector<glm::vec3> RayTracer::GenerateHemisphereSamples(int _numSamples)
 		float y = sin(phi) * sin(theta);
 		float z = cos(phi);
 
-		samples.emplace_back(x, y, z);
+		mHemisphereSamples.emplace_back(x, y, z);
 	}
-
-	return samples;
 }
 
-float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal, int _numSamples)
+void RayTracer::SetNumSamples(int _numSamples)
+{
+	if (mNumAOSamples == _numSamples)
+		return; // Don't recalculate samples if nothing changed
+
+	mNumAOSamples = _numSamples;
+	GenerateHemisphereSamples(mNumAOSamples);
+}
+
+float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal)
 {
 	int occlusionCount = 0;
-	auto samples = GenerateHemisphereSamples(_numSamples);
 
-	for (const auto& sampleDir : samples)
+	for (const auto& sampleDir : mHemisphereSamples)
 	{
 		glm::vec3 orientedSampleDir = glm::dot(sampleDir, _normal) > 0 ? sampleDir : -sampleDir;
 		Ray sampleRay(_intersectPosition + _normal * 0.01f, orientedSampleDir);
@@ -129,5 +138,5 @@ float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal, int 
 
 
 	}
-	return 1.0f - (static_cast<float>(occlusionCount) / _numSamples);
+	return 1.0f - (static_cast<float>(occlusionCount) / mNumAOSamples);
 }

@@ -126,21 +126,19 @@ int main(int argc, char* argv[])
 
 	SDL_Event e;
 
-	bool restartTimer = true;
+	bool restartFrameTimer = true;
 	Timer averageFrameTimer;
-
 	int frames = 0;
 
 	bool running = true;
 	while (running)
 	{
-		frames++;
 		Timer timer;
 
-		if (restartTimer)
+		if (restartFrameTimer)
 		{
 			averageFrameTimer.Start();
-			restartTimer = false;
+			restartFrameTimer = false;
 		}
 
 		while (SDL_PollEvent(&e))
@@ -222,6 +220,10 @@ int main(int argc, char* argv[])
 			ImGui::Checkbox("Ambient Occlusion", &ambientOcclusion);
 			rayTracer.mAmbientOcclusion = ambientOcclusion;
 
+			glm::vec3 ambientColour = rayTracer.mAmbientColour;
+			ImGui::ColorEdit3("Ambient Colour", &ambientColour[0]);
+			rayTracer.mAmbientColour = ambientColour;
+
 			float aoStrength = rayTracer.mAOStrength;
 			ImGui::SliderFloat("AO Strength", &aoStrength, 0.0f, 1.0f);
 			rayTracer.mAOStrength = aoStrength;
@@ -231,8 +233,8 @@ int main(int argc, char* argv[])
 			rayTracer.mAORadius = aoRadius;
 
 			int numSamples = rayTracer.mNumAOSamples;
-			ImGui::SliderInt("Num Samples", &numSamples, 1, 64);
-			rayTracer.mNumAOSamples = numSamples;
+			ImGui::SliderInt("Num Samples", &numSamples, 0, 128);
+			rayTracer.SetNumSamples(numSamples);
 
 
 			ImGui::Text("Sphere 1");
@@ -283,8 +285,12 @@ int main(int argc, char* argv[])
 		{
 			//std::cout << "Average FPS: " << frames << std::endl;
 			averageFrameTimer.Stop();
-			restartTimer = true;
+			restartFrameTimer = true;
 			frames = 0;
+		}
+		else
+		{
+			frames++;
 		}
 	}
 
