@@ -1,11 +1,10 @@
 #include "Plane.h"
 
-Plane::Plane(glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo, float _shininess)
+Plane::Plane(glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo)
 {
 	mPosition = _position;
 	mNormal = _normal;
 	mAlbedo = _albedo;
-	mShininess = _shininess;
 }
 
 bool Plane::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)

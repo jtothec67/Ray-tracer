@@ -32,7 +32,6 @@ public:
 
 	float mMetallic = 0.5f;
 	float mRoughness = 0.1f;
-	float mAmbientOcclusion = 0.0f;
 
 	bool mIsLight = false;
 

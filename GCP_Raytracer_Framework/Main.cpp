@@ -32,9 +32,6 @@ void TracePixel(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize,
 
 void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
-	//std::cout << _numOfThreads << " Rendering time: ";
-	//Timer timer;
-	
 	std::vector<std::thread> threads;
 	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numOfThreads));
 
@@ -47,31 +44,6 @@ void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, R
 
 	for (auto& thread : threads) {
 		thread.join();
-	}
-}
-
-void PlaceSpheresRandomly(RayTracer* _rayTracer, int _numOfSpheres, glm::vec3 _minPos, glm::vec3 _maxPos, float _minRadius, float _maxRadius, glm::vec3 _minColour, glm::vec3 _maxColour, float _minReflectivity, float _maxReflectivity)
-{
-	for (int i = 0; i < _numOfSpheres; ++i)
-	{
-		glm::vec3 pos = glm::vec3(
-			_minPos.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxPos.x - _minPos.x))),
-			_minPos.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxPos.y - _minPos.y))),
-			_minPos.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxPos.z - _minPos.z))
-				));
-
-		float radius = _minRadius + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxRadius - _minRadius)));
-		glm::vec3 colour = glm::vec3(
-			_minColour.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.x - _minColour.x))),
-			_minColour.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.y - _minColour.y))),
-			_minColour.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.z - _minColour.z))
-				));
-
-		float reflectivity = _minReflectivity + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxReflectivity - _minReflectivity)));
-
-		Sphere sphere(pos, radius, colour, reflectivity);
-		RayObject* raySphere = (RayObject*)&sphere;
-		_rayTracer->rayObjects.push_back(raySphere);
 	}
 }
 
@@ -101,7 +73,7 @@ int main(int argc, char* argv[])
 	glm::vec3 lightPos1 = glm::vec3(-40, 0, -40);
 	Light light1(lightPos1, glm::vec3(1, 1, 1));
 	lights.push_back(light1);
-	Sphere lightSphere1(lightPos1, 2, glm::vec3(1, 1, 1), 0);
+	Sphere lightSphere1(lightPos1, 2, glm::vec3(1, 1, 1));
 	RayObject* rayLightSphere1 = (RayObject*)&lightSphere1;
 	rayLightSphere1->mIsLight = true;
 	rayTracer.rayObjects.push_back(rayLightSphere1);
@@ -109,85 +81,37 @@ int main(int argc, char* argv[])
 	glm::vec3 lightPos2 = glm::vec3(45, 10, -50);
 	Light light2(lightPos2, glm::vec3(1, 1, 1));
 	lights.push_back(light2);
-	Sphere lightSphere2(lightPos2, 2, glm::vec3(1, 1, 1), 0);
+	Sphere lightSphere2(lightPos2, 2, glm::vec3(1, 1, 1));
 	RayObject* rayLightSphere2 = (RayObject*)&lightSphere2;
 	rayLightSphere2->mIsLight = true;
 	rayTracer.rayObjects.push_back(rayLightSphere2);
 
 	rayTracer.SetLights(&lights);
 
-	Sphere* sphere1 = new Sphere(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0), 1);
+	Sphere* sphere1 = new Sphere(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0));
 	sphere1->mMetallic = 0.6f;
 	RayObject* raySphere1 = (RayObject*)sphere1;
 	rayTracer.rayObjects.push_back(raySphere1);
 
-	Sphere* sphere2 = new Sphere(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0), 1);
+	Sphere* sphere2 = new Sphere(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0));
 	sphere2->mMetallic = 0;
 	RayObject* raySphere2 = (RayObject*)sphere2;
 	rayTracer.rayObjects.push_back(raySphere2);
 
-	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(0, 0, 1), 0);
+	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
+	plane1.mShininess = 0;
 	plane1.mMetallic = 0;
 	plane1.mRoughness = 1;
 	RayObject* rayPlane1 = (RayObject*)&plane1;
 	rayTracer.rayObjects.push_back(rayPlane1);
 
-	Plane plane2(glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), 0);
+	Plane plane2(glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(1, 1, 1));
+	plane2.mShininess = 0;
 	plane2.mMetallic = 0;
 	plane2.mRoughness = 1;
 	RayObject* rayPlane2 = (RayObject*)&plane2;
 	rayTracer.rayObjects.push_back(rayPlane2);
 
-	glm::vec3 minPos = glm::vec3(-40, -14, -50);
-	glm::vec3 maxPos = glm::vec3(40, 30, -50);
-
-	float minRadius = 1;
-	float maxRadius = 5;
-
-	glm::vec3 _minColour = glm::vec3(0, 0, 0);
-	glm::vec3 _maxColour = glm::vec3(1, 1, 1);
-
-	float _minReflectivity = 0;
-	float _maxReflectivity = 1;
-
-	srand(time(NULL));
-	for (int i = 0; i < 10; ++i)
-	{
-		glm::vec3 pos = glm::vec3(
-			minPos.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxPos.x - minPos.x))),
-			minPos.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxPos.y - minPos.y))),
-			minPos.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxPos.z - minPos.z))
-				));
-
-		float radius = minRadius + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxRadius - minRadius)));
-		glm::vec3 colour = glm::vec3(
-			_minColour.x + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.x - _minColour.x))),
-			_minColour.y + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.y - _minColour.y))),
-			_minColour.z + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxColour.z - _minColour.z))
-				));
-
-		float reflectivity = _minReflectivity + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (_maxReflectivity - _minReflectivity)));
-
-		Sphere* sphere = new Sphere(pos, radius, colour, reflectivity);
-		RayObject* raySphere = (RayObject*)sphere;
-		//rayTracer.rayObjects.push_back(raySphere);
-	}
-
-	/*for (int i = 0; i < 2; i++)
-	{
-
-		Sphere sphere(glm::vec3((-10 + rand() % 21), 0, -50), 4, glm::vec3(1, 0, 0), 0);
-		RayObject* raySphere = (RayObject*)&sphere;
-		rayTracer.rayObjects.push_back(raySphere);
-
-		Sphere sphere2(glm::vec3((-10 + rand() % 21), 0, -50), 4, glm::vec3(1, 0, 0), 0);
-		RayObject* raySphere2 = (RayObject*)&sphere2;
-		rayTracer.rayObjects.push_back(raySphere2);
-
-		Sphere sphere3(glm::vec3((-10 + rand() % 21), 0, -50), 4, glm::vec3(1, 0, 0), 0);
-		RayObject* raySphere3 = (RayObject*)&sphere3;
-		rayTracer.rayObjects.push_back(raySphere3);
-	}*/
 
 	// Setting up the GUI system
 	IMGUI_CHECKVERSION();
@@ -292,7 +216,25 @@ int main(int argc, char* argv[])
 			ImGui_ImplSDL2_NewFrame();
 			ImGui::NewFrame();
 
-			ImGui::Begin("Material Controls");
+			ImGui::Begin("Scene Controls");
+
+			bool ambientOcclusion = rayTracer.mAmbientOcclusion;
+			ImGui::Checkbox("Ambient Occlusion", &ambientOcclusion);
+			rayTracer.mAmbientOcclusion = ambientOcclusion;
+
+			float aoStrength = rayTracer.mAOStrength;
+			ImGui::SliderFloat("AO Strength", &aoStrength, 0.0f, 1.0f);
+			rayTracer.mAOStrength = aoStrength;
+
+			float aoRadius = rayTracer.mAORadius;
+			ImGui::SliderFloat("AO Radius", &aoRadius, 0.0f, 10.0f);
+			rayTracer.mAORadius = aoRadius;
+
+			int numSamples = rayTracer.mNumAOSamples;
+			ImGui::SliderInt("Num Samples", &numSamples, 1, 64);
+			rayTracer.mNumAOSamples = numSamples;
+
+
 			ImGui::Text("Sphere 1");
 
 			glm::vec3 albedo1 = sphere1->mAlbedo;
@@ -307,9 +249,6 @@ int main(int argc, char* argv[])
 			ImGui::SliderFloat("Roughness", &roughness1, 0.0f, 1.0f);
 			sphere1->mRoughness = roughness1;
 
-			float ambientOcclusion1 = sphere1->mAmbientOcclusion;
-			ImGui::SliderFloat("Ambient Occlusion", &ambientOcclusion1, 0.0f, 1.0f);
-			sphere1->mAmbientOcclusion = ambientOcclusion1;
 
 			ImGui::Text("Sphere 2");
 
@@ -325,10 +264,6 @@ int main(int argc, char* argv[])
 			ImGui::SliderFloat("Roughness2", &roughness2, 0.0f, 1.0f);
 			sphere2->mRoughness = roughness2;
 
-			float ambientOcclusion2 = sphere2->mAmbientOcclusion;
-			ImGui::SliderFloat("Ambient Occlusion2", &ambientOcclusion2, 0.0f, 1.0f);
-			sphere2->mAmbientOcclusion = ambientOcclusion2;
-
 			ImGui::End();
 
 		}
@@ -341,12 +276,12 @@ int main(int argc, char* argv[])
 		_myFramework.SwapWindow();
 
 		//std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
-		//std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
+		std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
 		timer.Stop();
 
 		if (averageFrameTimer.GetElapsedMilliseconds() > 1000)
 		{
-			std::cout << "Average FPS: " << frames << std::endl;
+			//std::cout << "Average FPS: " << frames << std::endl;
 			averageFrameTimer.Stop();
 			restartTimer = true;
 			frames = 0;
