@@ -17,13 +17,15 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 	for (auto rayObject : rayObjects)
 	{
 		glm::vec3 hitPos;
-		if (rayObject->RayIntersect(_ray, hitPos))
+		if (rayObject->RayIntersect(_ray, hitPos)) // If ray hits something
 		{
 			glm::vec3 hitToOrigin = _ray.origin - hitPos;
 			float length = glm::length(hitToOrigin);
 
+			// See if it's the closest hit
 			if (length < closestLength)
 			{
+				// Update variables with closest info and store the object for later
 				currentRayObject = rayObject;
 				currentHitPos = hitPos;
 				closestLength = length;
@@ -38,41 +40,50 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 	glm::vec3 finalPixelCol = glm::vec3(0.f, 0.f, 0.f);
 
 	// Loop through all of the lights and add their contribution to the final pixel colour
-	for (auto &light : *mLights)
+	for (auto& light : *mLights)
 	{
-		glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos, light.position);
+		bool inShadow = false;
 
 		if (mShadows)
 		{
 			// Check if in shadow
 			for (auto rayObject : rayObjects)
 			{
+				// Skip light objects
 				if (rayObject->mIsLight)
 					continue;
 
 				glm::vec3 hitPos;
-				glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.01f); // Offset from surface to avoid self-shadowing
+				// Offset from surface to avoid self-shadowing
+				glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.01f);
 
 				// If ray hits, check it's between hit position and the light
 				if (rayObject->RayIntersect(Ray(shadowRayFrom, glm::normalize(light.position - currentHitPos)), hitPos))
 				{
-					if (glm::length(hitPos - currentHitPos) > glm::length(light.position - currentHitPos))
-						continue;
-
-					// Shadow
-					thisPixelCol = glm::vec3(0, 0, 0);
+					if (glm::length(hitPos - currentHitPos) < glm::length(light.position - currentHitPos))
+					{
+						// inShadow set to true so nothing gets added to light contribution of final pixel colour
+						inShadow = true;
+						// Don't need to check more objects because we're in shadow
+						break;
+					}
 				}
 			}
 		}
-		
-		finalPixelCol += thisPixelCol;
+
+		if (!inShadow)
+		{
+			// Calculate and add light contribution
+			glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos, light.position);
+			finalPixelCol += thisPixelCol;
+		}
 	}
 
 	if (mAmbientOcclusion)
 	{
 		// Add ambient occlusion
 		float ao = ComputeAO(currentHitPos, currentRayObject->NormalAtPosition(currentHitPos));
-		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo * (1.0f - mAOStrength + ao * mAOStrength);
+		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo * (1.0f - mAOStrength + ao * mAOStrength); // Linear interpolation between AO strength and AO
 	}
 	else
 	{
@@ -85,9 +96,11 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 
 void RayTracer::GenerateHemisphereSamples(int _numSamples)
 {
+	// Clear old samples and reserve space for new ones (for efficiency)
 	mHemisphereSamples.clear();
 	mHemisphereSamples.reserve(_numSamples);
 
+	// Generates direction vectors evenly distributed on a hemisphere
 	for (int i = 0; i < _numSamples; ++i)
 	{
 		float u = static_cast<float>(i) / _numSamples;
@@ -108,6 +121,7 @@ void RayTracer::SetNumSamples(int _numSamples)
 	if (mNumAOSamples == _numSamples)
 		return; // Don't recalculate samples if nothing changed
 
+	// Recalculate samples
 	mNumAOSamples = _numSamples;
 	GenerateHemisphereSamples(mNumAOSamples);
 }
@@ -116,27 +130,37 @@ float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal)
 {
 	int occlusionCount = 0;
 
-	for (const auto& sampleDir : mHemisphereSamples)
+	// Check if each sample hits anything
+	for (auto& sampleDir : mHemisphereSamples)
 	{
+		// If our sample is beyond 90 degrees from the normal, flip it
 		glm::vec3 orientedSampleDir = glm::dot(sampleDir, _normal) > 0 ? sampleDir : -sampleDir;
+		// Create a ray from the intersect position (offset slightly to avoid intersecting with itself) with the samples direction
 		Ray sampleRay(_intersectPosition + _normal * 0.01f, orientedSampleDir);
 
+		// Check if the ray hits anything
 		for (auto rayObject : rayObjects)
 		{
+			// Skip light objects
 			if (rayObject->mIsLight)
 				continue;
 
 			glm::vec3 hitPos;
+			// If it hits
 			if (rayObject->RayIntersect(sampleRay, hitPos))
 			{
+				//Check if hit is in the AO radius specified
 				if (glm::length(hitPos - _intersectPosition) < mAORadius)
-
-				occlusionCount++;
-				break;
+				{
+					// Increase occlusion count
+					occlusionCount++;
+					// Don't need to check more objects so break out of object loop
+					break;
+				}
 			}
 		}
-
-
 	}
+
+	// Return the occlusion strength based on occlusionCount. 0 is fully occluded (no ambient light can reach it), 1 is no occlusion (all ambient light reaches it)
 	return 1.0f - (static_cast<float>(occlusionCount) / mNumAOSamples);
 }
