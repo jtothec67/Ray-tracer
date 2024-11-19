@@ -15,7 +15,7 @@
 #include <vector>
 #include <thread>
 
-void TracePixel(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
+void TracePixels(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
 	for (int y = _fromy; y <= _toy; ++y)
 	{
@@ -35,14 +35,16 @@ void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, R
 	std::vector<std::thread> threads;
 	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numOfThreads));
 
-	for (int i = 0; i < _numOfThreads; ++i) {
+	for (int i = 0; i < _numOfThreads; ++i)
+	{
 		int startY = i * rowsPerThread;
 		int endY = std::min(startY + rowsPerThread, _winSize.y);
 
-		threads.emplace_back(TracePixel, 0, startY, _winSize.x - 1, endY - 1, _winSize, _camera, _rayTracer, _myFramework);
+		threads.emplace_back(TracePixels, 0, startY, _winSize.x - 1, endY - 1, _winSize, _camera, _rayTracer, _myFramework);
 	}
 
-	for (auto& thread : threads) {
+	for (auto& thread : threads)
+	{
 		thread.join();
 	}
 }
