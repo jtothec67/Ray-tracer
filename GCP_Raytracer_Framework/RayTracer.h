@@ -11,7 +11,7 @@ public:
 	RayTracer();
 	~RayTracer() {}
 
-	glm::vec3 TraceRay(Ray _ray, glm::vec3 _camPos);
+	glm::vec3 TraceRay(Ray _ray, glm::vec3 _camPos, int _depth);
 
 	void GenerateHemisphereSamples(int _numSamples);
 	void SetNumSamples(int _numSamples);
@@ -24,12 +24,16 @@ public:
 
 	glm::vec3 mAmbientColour{ 0.05f, 0.05f, 0.05f };
 
+	bool mPBR = true;
+
 	bool mAmbientOcclusion = true;
 	float mAOStrength = 1.f;
 	float mAORadius = 5.f;
 	int mNumAOSamples = 16;
 
 	bool mShadows = true;
+
+	int mMaxDepth = 5;
 
 	std::vector<glm::vec3> mHemisphereSamples;
 

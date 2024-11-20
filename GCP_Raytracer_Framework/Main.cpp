@@ -24,7 +24,7 @@ void TracePixels(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize
 		{
 			if (x == _winSize.x) break;
 			Ray ray = _camera->GetRay(glm::ivec2(x, y), _winSize);
-			glm::vec3 colour = _rayTracer->TraceRay(ray, _camera->GetPosition());
+			glm::vec3 colour = _rayTracer->TraceRay(ray, _camera->GetPosition(), 0);
 			_myFramework->DrawPixel(glm::ivec2(x, y), colour);
 		}
 	}
@@ -90,8 +90,10 @@ int main(int argc, char* argv[])
 
 	rayTracer.SetLights(&lights);
 
-	Sphere* sphere1 = new Sphere(glm::vec3(-10, 0, -50), 10, glm::vec3(0, 1, 0));
-	sphere1->mMetallic = 0.6f;
+	Sphere* sphere1 = new Sphere(glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
+	sphere1->mMetallic = 0.0f;
+	sphere1->mShininess = 0.0f;
+	sphere1->mRoughness = 1;
 	RayObject* raySphere1 = (RayObject*)sphere1;
 	rayTracer.rayObjects.push_back(raySphere1);
 
@@ -195,11 +197,6 @@ int main(int argc, char* argv[])
 					camRot.y += 1;
 					camera.SetRotation(camRot);
 					break;
-				case SDLK_p:
-					for (auto rayObject : rayTracer.rayObjects)
-					{
-						rayObject->mPBR = !rayObject->mPBR;
-					}
 				}
 			}
 		}
@@ -218,6 +215,10 @@ int main(int argc, char* argv[])
 
 			ImGui::Begin("Scene Controls");
 
+			bool pbr = rayTracer.mPBR;
+			ImGui::Checkbox("PBR", &pbr);
+			rayTracer.mPBR = pbr;
+
 			bool ambientOcclusion = rayTracer.mAmbientOcclusion;
 			ImGui::Checkbox("Ambient Occlusion", &ambientOcclusion);
 			rayTracer.mAmbientOcclusion = ambientOcclusion;
@@ -235,11 +236,19 @@ int main(int argc, char* argv[])
 			rayTracer.mAORadius = aoRadius;
 
 			int numSamples = rayTracer.mNumAOSamples;
-			ImGui::SliderInt("Num Samples", &numSamples, 0, 128);
+			ImGui::SliderInt("Num AO Samples", &numSamples, 0, 128);
 			rayTracer.SetNumSamples(numSamples);
+
+			int depth = rayTracer.mMaxDepth;
+			ImGui::SliderInt("Max reflectivity depth", &depth, 0, 10);
+			rayTracer.mMaxDepth = depth;
 
 
 			ImGui::Text("Sphere 1");
+
+			float shiney1 = sphere1->mShininess;
+			ImGui::SliderFloat("Shininess(pbr)", &shiney1, 0.0f, 1.0f);
+			sphere1->mShininess = shiney1;
 
 			glm::vec3 albedo1 = sphere1->mAlbedo;
 			ImGui::ColorEdit3("Albedo", &albedo1[0]);
@@ -253,8 +262,16 @@ int main(int argc, char* argv[])
 			ImGui::SliderFloat("Roughness", &roughness1, 0.0f, 1.0f);
 			sphere1->mRoughness = roughness1;
 
+			float reflectivity1 = sphere1->mReflectivity;
+			ImGui::SliderFloat("Reflectivity", &reflectivity1, 0.0f, 1.0f);
+			sphere1->mReflectivity = reflectivity1;
+
 
 			ImGui::Text("Sphere 2");
+
+			float shiney2 = sphere2->mShininess;
+			ImGui::SliderFloat("Shininess2(pbr)", &shiney2, 0.0f, 1.0f);
+			sphere2->mShininess = shiney2;
 
 			glm::vec3 albedo2 = sphere2->mAlbedo;
 			ImGui::ColorEdit3("Albedo2", &albedo2[0]);
@@ -267,6 +284,10 @@ int main(int argc, char* argv[])
 			float roughness2 = sphere2->mRoughness;
 			ImGui::SliderFloat("Roughness2", &roughness2, 0.0f, 1.0f);
 			sphere2->mRoughness = roughness2;
+
+			float reflectivity2 = sphere2->mReflectivity;
+			ImGui::SliderFloat("Reflectivity2", &reflectivity2, 0.0f, 1.0f);
+			sphere2->mReflectivity = reflectivity2;
 
 			ImGui::End();
 

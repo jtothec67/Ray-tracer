@@ -2,12 +2,12 @@
 
 #include <iostream>
 
-glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos, glm::vec3 _lightPos)
+glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos, glm::vec3 _lightPos, bool _pbr)
 {
 	if (mIsLight)
 		return mAlbedo;
 
-    if (mPBR)
+    if (_pbr)
         return CalculatePBR(_intersectPosition, _lightDir, _lightCol, _camPos, _lightPos);
     else
         return CalulateDiffuseAndSpecular(_intersectPosition, _lightDir, _lightCol, _camPos);

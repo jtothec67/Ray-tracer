@@ -6,7 +6,7 @@ RayTracer::RayTracer()
 	GenerateHemisphereSamples(mNumAOSamples);
 }
 
-glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
+glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 {
 	glm::vec3 currentHitPos;
 	RayObject* currentRayObject = nullptr;
@@ -74,7 +74,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 		if (!inShadow)
 		{
 			// Calculate and add light contribution
-			glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos, light.position);
+			glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos, light.position, mPBR);
 			finalPixelCol += thisPixelCol;
 		}
 	}
@@ -89,6 +89,19 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos)
 	{
 		// Add ambient light
 		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo;
+	}
+
+	// Check if the depth we're at exceeds the max depth, and that the reflectivity is enough to make a difference
+	if (_depth < mMaxDepth && currentRayObject->mReflectivity > 0.01f)
+	{
+		// Calculate direction to reflect
+		glm::vec3 reflectionDir = glm::reflect(_ray.direction,currentRayObject->NormalAtPosition(currentHitPos));
+		// Create reflection ray
+		Ray reflectionRay(currentHitPos + currentRayObject->NormalAtPosition(currentHitPos) * 0.01f, reflectionDir);
+		// Trace the reflected ray to get the colour (recursion), add 1 to the depth
+		glm::vec3 reflectionColor = TraceRay(reflectionRay, _camPos, _depth + 1);
+		// Add reflection colour multiplied by reflectivity value of the object
+		finalPixelCol += reflectionColor * currentRayObject->mReflectivity;
 	}
 
 	return finalPixelCol;
