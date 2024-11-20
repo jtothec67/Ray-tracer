@@ -134,6 +134,10 @@ int main(int argc, char* argv[])
 	Timer averageFrameTimer;
 	int frames = 0;
 
+	float fps = 0.f;
+
+	int threadCount = 16;
+
 	bool running = true;
 	while (running)
 	{
@@ -205,7 +209,7 @@ int main(int argc, char* argv[])
 
 		_myFramework.ClearWindow();
 
-		RayTraceParallel(16, winSize, &camera, &rayTracer, &_myFramework);
+		RayTraceParallel(threadCount, winSize, &camera, &rayTracer, &_myFramework);
 
 		{
 
@@ -214,6 +218,12 @@ int main(int argc, char* argv[])
 			ImGui::NewFrame();
 
 			ImGui::Begin("Scene Controls");
+
+			ImGui::Text("FPS: %s", std::to_string(fps).c_str());
+
+			int numThreads = threadCount;
+			ImGui::SliderInt("Number of threads", &numThreads, 0, 128);
+			threadCount = numThreads;
 
 			bool pbr = rayTracer.mPBR;
 			ImGui::Checkbox("PBR", &pbr);
@@ -300,8 +310,7 @@ int main(int argc, char* argv[])
 
 		_myFramework.SwapWindow();
 
-		//std::cout << "Frame time: " << timer.GetElapsedMilliseconds() << std::endl;
-		std::cout << "FPS: " << 1000 / timer.GetElapsedMilliseconds() << std::endl;
+		fps = 1000 / timer.GetElapsedMilliseconds();
 		timer.Stop();
 
 		if (averageFrameTimer.GetElapsedMilliseconds() > 1000)
