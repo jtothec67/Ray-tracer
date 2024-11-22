@@ -166,6 +166,7 @@
     <ClCompile Include="SDKs\IMGUI\imgui_tables.cpp" />
     <ClCompile Include="SDKs\IMGUI\imgui_widgets.cpp" />
     <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +192,7 @@
     <ClInclude Include="SDKs\IMGUI\imstb_textedit.h" />
     <ClInclude Include="SDKs\IMGUI\imstb_truetype.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

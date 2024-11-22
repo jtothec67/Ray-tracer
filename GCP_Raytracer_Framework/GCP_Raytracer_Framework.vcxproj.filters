@@ -69,6 +69,9 @@
     <ClCompile Include="SDKs\IMGUI\imgui_impl_sdl.cpp">
       <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
+    <ClCompile Include="ThreadPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="FragShader.txt">
@@ -135,6 +138,9 @@
     </ClInclude>
     <ClInclude Include="SDKs\IMGUI\imstb_truetype.h">
       <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

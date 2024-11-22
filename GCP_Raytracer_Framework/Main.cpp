@@ -7,6 +7,7 @@
 #include "Plane.h"
 #include "Light.h"
 #include "Timer.h"
+#include "ThreadPool.h"
 
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
@@ -15,14 +16,14 @@
 #include <vector>
 #include <thread>
 
-void TracePixels(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
+void TracePixels(int _fromy, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
 	for (int y = _fromy; y <= _toy; ++y)
 	{
-		if (y == _winSize.y) break;
-		for (int x = _fromx; x <= _tox; ++x)
+		if (y >= _winSize.y) break;
+		for (int x = 0; x <= _winSize.x; ++x)
 		{
-			if (x == _winSize.x) break;
+			if (x >= _winSize.x) break;
 			Ray ray = _camera->GetRay(glm::ivec2(x, y), _winSize);
 			glm::vec3 colour = _rayTracer->TraceRay(ray, _camera->GetPosition(), 0);
 			_myFramework->DrawPixel(glm::ivec2(x, y), colour);
@@ -30,9 +31,9 @@ void TracePixels(int _fromx, int _fromy, int _tox, int _toy, glm::ivec2 _winSize
 	}
 }
 
-void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
+void RayTraceParallel(ThreadPool& threadPool, int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
-	std::vector<std::thread> threads;
+	//std::vector<std::thread> threads;
 	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numOfThreads));
 
 	for (int i = 0; i < _numOfThreads; ++i)
@@ -40,13 +41,19 @@ void RayTraceParallel(int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, R
 		int startY = i * rowsPerThread;
 		int endY = std::min(startY + rowsPerThread, _winSize.y);
 
-		threads.emplace_back(TracePixels, 0, startY, _winSize.x - 1, endY - 1, _winSize, _camera, _rayTracer, _myFramework);
+		threadPool.EnqueueTask([=] {
+			TracePixels(startY, endY - 1, _winSize, _camera, _rayTracer, _myFramework);
+			});
+
+		//threads.emplace_back(TracePixels, startY, endY - 1, _winSize, _camera, _rayTracer, _myFramework);
 	}
 
-	for (auto& thread : threads)
+	/*for (auto& thread : threads)
 	{
 		thread.join();
-	}
+	}*/
+
+	threadPool.WaitForCompletion();
 }
 
 int main(int argc, char* argv[])
@@ -137,6 +144,7 @@ int main(int argc, char* argv[])
 	float fps = 0.f;
 
 	int threadCount = 16;
+	ThreadPool threadPool(16);
 
 	bool running = true;
 	while (running)
@@ -209,7 +217,7 @@ int main(int argc, char* argv[])
 
 		_myFramework.ClearWindow();
 
-		RayTraceParallel(threadCount, winSize, &camera, &rayTracer, &_myFramework);
+		RayTraceParallel(threadPool, threadCount, winSize, &camera, &rayTracer, &_myFramework);
 
 		{
 
@@ -315,7 +323,7 @@ int main(int argc, char* argv[])
 
 		if (averageFrameTimer.GetElapsedMilliseconds() > 1000)
 		{
-			//std::cout << "Average FPS: " << frames << std::endl;
+			std::cout << "Average FPS: " << frames << std::endl;
 			averageFrameTimer.Stop();
 			restartFrameTimer = true;
 			frames = 0;
@@ -330,6 +338,9 @@ int main(int argc, char* argv[])
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
+
+	// Shutdown thread pool
+	threadPool.Shutdown();
 
 	return 0;
 }
