@@ -32,6 +32,9 @@ public:
 
 	float mReflectivity = 0;
 
+	float mRefractiveIndex = 1.0f;
+	float mTransparency = 0.0f;
+
 	float mMetallic = 0.5f;
 	float mRoughness = 0.1f;
 

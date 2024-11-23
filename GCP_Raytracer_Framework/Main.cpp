@@ -31,12 +31,12 @@ void TracePixels(int _fromy, int _toy, glm::ivec2 _winSize, Camera* _camera, Ray
 	}
 }
 
-void RayTraceParallel(ThreadPool& threadPool, int _numOfThreads, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
+void RayTraceParallel(ThreadPool& threadPool, int _numTasks, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
 	//std::vector<std::thread> threads;
-	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numOfThreads));
+	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numTasks));
 
-	for (int i = 0; i < _numOfThreads; ++i)
+	for (int i = 0; i < _numTasks; ++i)
 	{
 		int startY = i * rowsPerThread;
 		int endY = std::min(startY + rowsPerThread, _winSize.y);
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 
 	float fps = 0.f;
 
-	int threadCount = 16;
+	int numTasks = 16;
 	ThreadPool threadPool(16);
 
 	bool running = true;
@@ -170,44 +170,34 @@ int main(int argc, char* argv[])
 				switch (e.key.keysym.sym)
 				{
 				case SDLK_w:
-					camPos += camera.GetForward();
-					camera.SetPosition(camPos);
+					camera.SetPosition(camera.GetPosition() + camera.GetForward());
 					break;
 				case SDLK_s:
-					camPos -= camera.GetForward();
-					camera.SetPosition(camPos);
+					camera.SetPosition(camera.GetPosition() - camera.GetForward());
 					break;
 				case SDLK_a:
-					camPos += camera.GetRight();
-					camera.SetPosition(camPos);
+					camera.SetPosition(camera.GetPosition() + camera.GetRight());
 					break;
 				case SDLK_d:
-					camPos -= camera.GetRight();
-					camera.SetPosition(camPos);
+					camera.SetPosition(camera.GetPosition() - camera.GetRight());
 					break;
 				case SDLK_q:
-					camPos.y -= 1;
-					camera.SetPosition(camPos);
+					camera.SetPosition(camera.GetPosition() - camera.GetUp());
 					break;
 				case SDLK_e:
-					camPos.y += 1;
-					camera.SetPosition(camPos);
+					camera.SetPosition(camera.GetPosition() + camera.GetUp());
 					break;
 				case SDLK_UP:
-					camRot.x -= 1;
-					camera.SetRotation(camRot);
+					camera.SetRotation(glm::vec3(camera.GetRotation().x - 1, camera.GetRotation().y, camera.GetRotation().z));
 					break;
 				case SDLK_DOWN:
-					camRot.x += 1;
-					camera.SetRotation(camRot);
+					camera.SetRotation(glm::vec3(camera.GetRotation().x + 1, camera.GetRotation().y, camera.GetRotation().z));
 					break;
 				case SDLK_LEFT:
-					camRot.y -= 1;
-					camera.SetRotation(camRot);
+					camera.SetRotation(glm::vec3(camera.GetRotation().x, camera.GetRotation().y - 1, camera.GetRotation().z));
 					break;
 				case SDLK_RIGHT:
-					camRot.y += 1;
-					camera.SetRotation(camRot);
+					camera.SetRotation(glm::vec3(camera.GetRotation().x, camera.GetRotation().y + 1, camera.GetRotation().z));
 					break;
 				}
 			}
@@ -217,7 +207,7 @@ int main(int argc, char* argv[])
 
 		_myFramework.ClearWindow();
 
-		RayTraceParallel(threadPool, threadCount, winSize, &camera, &rayTracer, &_myFramework);
+		RayTraceParallel(threadPool, numTasks, winSize, &camera, &rayTracer, &_myFramework);
 
 		{
 
@@ -229,13 +219,17 @@ int main(int argc, char* argv[])
 
 			ImGui::Text("FPS: %s", std::to_string(fps).c_str());
 
-			int numThreads = threadCount;
-			ImGui::SliderInt("Number of threads", &numThreads, 0, 128);
-			threadCount = numThreads;
+			int tasks = numTasks;
+			ImGui::SliderInt("Number of tasks", &tasks, 0, 128);
+			numTasks = tasks;
 
 			bool pbr = rayTracer.mPBR;
 			ImGui::Checkbox("PBR", &pbr);
 			rayTracer.mPBR = pbr;
+
+			bool shadows = rayTracer.mShadows;
+			ImGui::Checkbox("Shadows", &shadows);
+			rayTracer.mShadows = shadows;
 
 			bool ambientOcclusion = rayTracer.mAmbientOcclusion;
 			ImGui::Checkbox("Ambient Occlusion", &ambientOcclusion);
@@ -284,6 +278,14 @@ int main(int argc, char* argv[])
 			ImGui::SliderFloat("Reflectivity", &reflectivity1, 0.0f, 1.0f);
 			sphere1->mReflectivity = reflectivity1;
 
+			float refractiveIndex1 = sphere1->mRefractiveIndex;
+			ImGui::SliderFloat("Refractive Index", &refractiveIndex1, 1.0f, 2.0f);
+			sphere1->mRefractiveIndex = refractiveIndex1;
+
+			float transparency1 = sphere1->mTransparency;
+			ImGui::SliderFloat("Transparency", &transparency1, 0.0f, 1.0f);
+			sphere1->mTransparency = transparency1;
+
 
 			ImGui::Text("Sphere 2");
 
@@ -306,6 +308,14 @@ int main(int argc, char* argv[])
 			float reflectivity2 = sphere2->mReflectivity;
 			ImGui::SliderFloat("Reflectivity2", &reflectivity2, 0.0f, 1.0f);
 			sphere2->mReflectivity = reflectivity2;
+
+			float refractiveIndex2 = sphere2->mRefractiveIndex;
+			ImGui::SliderFloat("Refractive Index2", &refractiveIndex2, 1.0f, 2.0f);
+			sphere2->mRefractiveIndex = refractiveIndex2;
+
+			float transparency2 = sphere2->mTransparency;
+			ImGui::SliderFloat("Transparency2", &transparency2, 0.0f, 1.0f);
+			sphere2->mTransparency = transparency2;
 
 			ImGui::End();
 

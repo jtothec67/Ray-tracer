@@ -91,6 +91,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo;
 	}
 
+	// Reflections
 	// Check if the depth we're at exceeds the max depth, and that the reflectivity is enough to make a difference
 	if (_depth < mMaxDepth && currentRayObject->mReflectivity > 0.01f)
 	{
@@ -102,6 +103,19 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		glm::vec3 reflectionColor = TraceRay(reflectionRay, _camPos, _depth + 1);
 		// Add reflection colour multiplied by reflectivity value of the object
 		finalPixelCol += reflectionColor * currentRayObject->mReflectivity;
+	}
+
+
+	if (_depth < mMaxDepth && currentRayObject->mTransparency > 0.01f)
+	{
+		// Calculate refraction direction (refract takes incident direction, normal, and ratio of RI coming from and going in to (we just assume 1 which is RI of air))
+		glm::vec3 refractionDir = glm::refract(_ray.direction, currentRayObject->NormalAtPosition(currentHitPos), 1.0f / currentRayObject->mRefractiveIndex);
+		// Create refraction ray
+		Ray refractionRay(currentHitPos - currentRayObject->NormalAtPosition(currentHitPos) * 0.01f, refractionDir);
+		// Trace the refracted ray to get the colour (recursion), add 1 to the depth
+		glm::vec3 refractionColor = TraceRay(refractionRay, _camPos, _depth + 1);
+		// Add refraction colour multiplied by transparency value of the object
+		finalPixelCol += refractionColor * currentRayObject->mTransparency;
 	}
 
 	return finalPixelCol;

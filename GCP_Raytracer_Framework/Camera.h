@@ -15,10 +15,11 @@ public:
 
 	void CalculateMatricies(glm::ivec2 _winSize);
 
-	void SetPosition(glm::vec3 _position) { transformChanged = true; position = _position; }
+	void SetPosition(glm::vec3 _position) { position = _position; CalculateMatricies(lastWinSize); }
 	glm::vec3 GetPosition() { return position; }
 
-	void SetRotation(glm::vec3 _rotation) { transformChanged = true; rotation = _rotation; }
+	void SetRotation(glm::vec3 _rotation) { rotation = _rotation; CalculateMatricies(lastWinSize);
+	}
 	glm::vec3 GetRotation() { return rotation; }
 
 	glm::vec3 GetForward();
@@ -28,7 +29,7 @@ public:
 	glm::vec3 position{ 0.f };
 	glm::vec3 rotation{ 0.f };
 
-	bool transformChanged = false;
+	glm::ivec2 lastWinSize{ 0, 0 };
 
 	glm::mat4 viewMat{ 1.f };
 	glm::mat4 projectionMat{ 1.f };

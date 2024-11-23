@@ -26,14 +26,14 @@ public:
 
 	bool mPBR = true;
 
-	bool mAmbientOcclusion = true;
+	bool mAmbientOcclusion = false;
 	float mAOStrength = 1.f;
 	float mAORadius = 5.f;
 	int mNumAOSamples = 16;
 
 	bool mShadows = true;
 
-	int mMaxDepth = 5;
+	int mMaxDepth = 2;
 
 	std::vector<glm::vec3> mHemisphereSamples;
 

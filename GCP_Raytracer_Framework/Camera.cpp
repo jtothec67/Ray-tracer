@@ -9,12 +9,7 @@ Camera::Camera(glm::vec3 _position, glm::vec3 _rotation, glm::ivec2 _winSize)
 	rotation = _rotation;
 
 	
-	viewMat = glm::rotate(viewMat, glm::radians(rotation.x), glm::vec3(1, 0, 0));
-	viewMat = glm::rotate(viewMat, glm::radians(rotation.y), glm::vec3(0, 1, 0));
-	viewMat = glm::rotate(viewMat, glm::radians(rotation.z), glm::vec3(0, 0, 1));
-	viewMat = glm::translate(viewMat, position);
-
-	projectionMat = glm::perspective(glm::radians(60.f), (float)_winSize.x / (float)_winSize.y, 0.1f, 100.f);
+	CalculateMatricies(_winSize);
 }
 
 void Camera::CalculateMatricies(glm::ivec2 _winSize)
@@ -32,11 +27,7 @@ void Camera::CalculateMatricies(glm::ivec2 _winSize)
 
 Ray Camera::GetRay(glm::ivec2 _windowPos, glm::ivec2 _windowSize)
 {
-	if (transformChanged)
-	{
-		CalculateMatricies(_windowSize);
-		transformChanged = false;
-	}
+	lastWinSize = _windowSize;
 
 	glm::vec2 fWinPos = glm::vec2((float)_windowPos.x, (float)_windowPos.y);
 	glm::vec2 fWinSize = glm::vec2((float)_windowSize.x, (float)_windowSize.y);
