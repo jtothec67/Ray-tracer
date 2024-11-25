@@ -2,38 +2,40 @@
 
 #include <iostream>
 
-glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos, glm::vec3 _lightPos, bool _pbr)
+glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, Light& _light, glm::vec3 _camPos, bool _pbr)
 {
 	if (mIsLight)
 		return mAlbedo;
 
     if (_pbr)
-        return CalculatePBR(_intersectPosition, _lightDir, _lightCol, _camPos, _lightPos);
+        return CalculatePBR(_intersectPosition, _light, _camPos);
     else
-        return CalulateDiffuseAndSpecular(_intersectPosition, _lightDir, _lightCol, _camPos);
+        return CalulateDiffuseAndSpecular(_intersectPosition, _light, _camPos);
 	
 }
 
-glm::vec3 RayObject::CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos)
+glm::vec3 RayObject::CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, Light& _light, glm::vec3 _camPos)
 {
+    glm::vec3 lightDir = glm::normalize(_light.position - _intersectPosition);
+
 	glm::vec3 normal = NormalAtPosition(_intersectPosition);
 	glm::vec3 eyeDir = glm::normalize(_camPos - _intersectPosition);
 
-	glm::vec3 diffuse = (glm::max(glm::dot(normal, _lightDir), 0.f)) * mAlbedo * _lightCol;
+	glm::vec3 diffuse = (glm::max(glm::dot(normal, lightDir), 0.f)) * mAlbedo * _light.colour;
 
-	glm::vec3 reflectDir = glm::reflect(-_lightDir, normal);
+	glm::vec3 reflectDir = glm::reflect(-lightDir, normal);
 	float spec = glm::pow(glm::max(glm::dot(eyeDir, reflectDir), 0.f), 32);
-	glm::vec3 specular = spec * mShininess * _lightCol;
+	glm::vec3 specular = spec * mShininess * _light.colour;
 
 	return diffuse + specular;
 }
 
-glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, glm::vec3 _lightDir, glm::vec3 _lightCol, glm::vec3 _camPos, glm::vec3 _lightPos)
+glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, Light& _light, glm::vec3 _camPos)
 {
     glm::vec3 normal = NormalAtPosition(_intersectPosition);
     glm::vec3 eyeDir = glm::normalize(_camPos - _intersectPosition);
 
-    glm::vec3 lightDir = glm::normalize(_lightDir);
+    glm::vec3 lightDir = glm::normalize(_light.position - _intersectPosition);
 
     glm::vec3 halfVector = glm::normalize(lightDir + eyeDir);
 
@@ -56,11 +58,11 @@ glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, glm::vec3 _light
     float denominator = 4.0f * glm::max(4.0f * NdotL * NdotH, 0.001f);
     glm::vec3 specular = numerator / denominator;
 
-    glm::vec3 ambient = glm::vec3(0.00f) * mAlbedo * _lightCol;
+    glm::vec3 ambient = glm::vec3(0.00f) * mAlbedo * _light.colour;
 
     glm::vec3 colour = (kD * mAlbedo / 3.1415f) + specular;
 
-    return (colour * NdotL + ambient) * _lightCol;
+    return (colour * NdotL + ambient) * _light.colour;
 }
 
 glm::vec3 RayObject::fresnelSchlick(float cosTheta, const glm::vec3& F0) {

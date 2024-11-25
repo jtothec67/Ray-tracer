@@ -74,7 +74,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		if (!inShadow)
 		{
 			// Calculate and add light contribution
-			glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, glm::normalize(light.position - currentHitPos), light.colour, _camPos, light.position, mPBR);
+			glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, light, _camPos, mPBR);
 			finalPixelCol += thisPixelCol;
 		}
 	}
