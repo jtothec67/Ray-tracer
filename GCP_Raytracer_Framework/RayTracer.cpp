@@ -103,6 +103,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		glm::vec3 reflectionColor = TraceRay(reflectionRay, _camPos, _depth + 1);
 		// Add reflection colour multiplied by reflectivity value of the object
 		finalPixelCol += reflectionColor * currentRayObject->mReflectivity;
+		finalPixelCol = glm::mix(finalPixelCol, reflectionColor, currentRayObject->mReflectivity);
 	}
 
 
@@ -115,7 +116,8 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		// Trace the refracted ray to get the colour (recursion), add 1 to the depth
 		glm::vec3 refractionColor = TraceRay(refractionRay, _camPos, _depth + 1);
 		// Add refraction colour multiplied by transparency value of the object
-		finalPixelCol += refractionColor * currentRayObject->mTransparency;
+		//finalPixelCol += refractionColor * currentRayObject->mTransparency;
+		finalPixelCol = glm::mix(finalPixelCol, refractionColor, currentRayObject->mTransparency);
 	}
 
 	return finalPixelCol;

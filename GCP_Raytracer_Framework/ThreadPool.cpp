@@ -1,6 +1,7 @@
 #include "ThreadPool.h"
 
-ThreadPool::ThreadPool(size_t numThreads) : stop(false), activeTasks(0) {
+ThreadPool::ThreadPool(size_t numThreads) : stop(false), activeTasks(0)
+{
     for (size_t i = 0; i < numThreads; ++i) {
         workers.emplace_back([this] {
             for (;;) {
@@ -30,7 +31,8 @@ ThreadPool::ThreadPool(size_t numThreads) : stop(false), activeTasks(0) {
     }
 }
 
-ThreadPool::~ThreadPool() {
+ThreadPool::~ThreadPool()
+{
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         stop = true;
@@ -40,7 +42,8 @@ ThreadPool::~ThreadPool() {
         worker.join();
 }
 
-void ThreadPool::EnqueueTask(std::function<void()> task) {
+void ThreadPool::EnqueueTask(std::function<void()> task)
+{
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         tasks.emplace(std::move(task));
@@ -48,12 +51,14 @@ void ThreadPool::EnqueueTask(std::function<void()> task) {
     condition.notify_one();
 }
 
-void ThreadPool::WaitForCompletion() {
+void ThreadPool::WaitForCompletion()
+{
     std::unique_lock<std::mutex> lock(queueMutex);
     completionCondition.wait(lock, [this] { return tasks.empty() && activeTasks == 0; });
 }
 
-void ThreadPool::Shutdown() {
+void ThreadPool::Shutdown()
+{
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         stop = true;
