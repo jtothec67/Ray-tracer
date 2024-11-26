@@ -77,46 +77,46 @@ int main(int argc, char* argv[])
 
 	RayTracer rayTracer;
 
-	std::vector<Light> lights;
+	std::vector<Light*> lights;
 
 	glm::vec3 lightPos1 = glm::vec3(-40, 0, -40);
-	Light light1(lightPos1, glm::vec3(1, 1, 1));
+	Light* light1 = new Light(lightPos1, glm::vec3(1, 1, 1));
 	lights.push_back(light1);
-	Sphere lightSphere1(lightPos1, 2, glm::vec3(1, 1, 1));
+	Sphere lightSphere1("Light1", lightPos1, 2, glm::vec3(1, 1, 1));
 	RayObject* rayLightSphere1 = (RayObject*)&lightSphere1;
 	rayLightSphere1->mIsLight = true;
 	rayTracer.rayObjects.push_back(rayLightSphere1);
 
 	glm::vec3 lightPos2 = glm::vec3(45, 10, -50);
-	Light light2(lightPos2, glm::vec3(1, 1, 1));
+	Light* light2 = new Light(lightPos2, glm::vec3(1, 1, 1));
 	lights.push_back(light2);
-	Sphere lightSphere2(lightPos2, 2, glm::vec3(1, 1, 1));
+	Sphere lightSphere2("Light2", lightPos2, 2, glm::vec3(1, 1, 1));
 	RayObject* rayLightSphere2 = (RayObject*)&lightSphere2;
 	rayLightSphere2->mIsLight = true;
 	rayTracer.rayObjects.push_back(rayLightSphere2);
 
-	rayTracer.SetLights(&lights);
+	rayTracer.SetLights(lights);
 
-	Sphere* sphere1 = new Sphere(glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
+	Sphere* sphere1 = new Sphere("Sphere1", glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
 	sphere1->mMetallic = 0.0f;
 	sphere1->mShininess = 0.0f;
 	sphere1->mRoughness = 1;
 	RayObject* raySphere1 = (RayObject*)sphere1;
 	rayTracer.rayObjects.push_back(raySphere1);
 
-	Sphere* sphere2 = new Sphere(glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0));
+	Sphere* sphere2 = new Sphere("Sphere2", glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0));
 	sphere2->mMetallic = 0;
 	RayObject* raySphere2 = (RayObject*)sphere2;
 	rayTracer.rayObjects.push_back(raySphere2);
 
-	Plane plane1(glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
+	Plane plane1("Plane1", glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
 	plane1.mShininess = 0;
 	plane1.mMetallic = 0;
 	plane1.mRoughness = 1;
 	RayObject* rayPlane1 = (RayObject*)&plane1;
 	rayTracer.rayObjects.push_back(rayPlane1);
 
-	Plane plane2(glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(1, 1, 1));
+	Plane plane2("Plane2", glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(1, 1, 1));
 	plane2.mShininess = 0;
 	plane2.mMetallic = 0;
 	plane2.mRoughness = 1;
@@ -145,6 +145,8 @@ int main(int argc, char* argv[])
 
 	int numTasks = 16;
 	ThreadPool threadPool(16);
+
+	int newBallCount = 0;
 
 	bool running = true;
 	while (running)
@@ -199,6 +201,21 @@ int main(int argc, char* argv[])
 				case SDLK_RIGHT:
 					camera.SetRotation(glm::vec3(camera.GetRotation().x, camera.GetRotation().y + 1, camera.GetRotation().z));
 					break;
+				case SDLK_p:
+					Sphere* sphere = new Sphere("New Sphere " + std::to_string(++newBallCount), camera.GetPosition(), 10, glm::vec3(1, 0, 0));
+					sphere->mMetallic = 0;
+					RayObject* raySphere = (RayObject*)sphere;
+					rayTracer.rayObjects.push_back(raySphere);
+					break;
+				//case SDLK_l:
+				//	// DOESNT WORK
+				//	Light* light = new Light(camera.GetPosition(), glm::vec3(1, 1, 1));
+				//	lights.push_back(light);
+				//	Sphere* lightSphere = new Sphere("Light " + std::to_string(lights.size()), camera.GetPosition(), 2, glm::vec3(1, 1, 1));
+				//	RayObject* rayLightSphere = (RayObject*)&lightSphere;
+				//	rayLightSphere->mIsLight = true;
+				//	rayTracer.rayObjects.push_back(rayLightSphere);
+				//	break;
 				}
 			}
 		}
@@ -256,66 +273,10 @@ int main(int argc, char* argv[])
 			rayTracer.mMaxDepth = depth;
 
 
-			ImGui::Text("Sphere 1");
-
-			float shiney1 = sphere1->mShininess;
-			ImGui::SliderFloat("Shininess(pbr)", &shiney1, 0.0f, 1.0f);
-			sphere1->mShininess = shiney1;
-
-			glm::vec3 albedo1 = sphere1->mAlbedo;
-			ImGui::ColorEdit3("Albedo", &albedo1[0]);
-			sphere1->mAlbedo = albedo1;
-
-			float metallic1 = sphere1->mMetallic;
-			ImGui::SliderFloat("Metallic", &metallic1, 0.0f, 1.0f);
-			sphere1->mMetallic = metallic1;
-
-			float roughness1 = sphere1->mRoughness;
-			ImGui::SliderFloat("Roughness", &roughness1, 0.0f, 1.0f);
-			sphere1->mRoughness = roughness1;
-
-			float reflectivity1 = sphere1->mReflectivity;
-			ImGui::SliderFloat("Reflectivity", &reflectivity1, 0.0f, 1.0f);
-			sphere1->mReflectivity = reflectivity1;
-
-			float refractiveIndex1 = sphere1->mRefractiveIndex;
-			ImGui::SliderFloat("Refractive Index", &refractiveIndex1, 1.0f, 2.0f);
-			sphere1->mRefractiveIndex = refractiveIndex1;
-
-			float transparency1 = sphere1->mTransparency;
-			ImGui::SliderFloat("Transparency", &transparency1, 0.0f, 1.0f);
-			sphere1->mTransparency = transparency1;
-
-
-			ImGui::Text("Sphere 2");
-
-			float shiney2 = sphere2->mShininess;
-			ImGui::SliderFloat("Shininess2(pbr)", &shiney2, 0.0f, 1.0f);
-			sphere2->mShininess = shiney2;
-
-			glm::vec3 albedo2 = sphere2->mAlbedo;
-			ImGui::ColorEdit3("Albedo2", &albedo2[0]);
-			sphere2->mAlbedo = albedo2;
-
-			float metallic2 = sphere2->mMetallic;
-			ImGui::SliderFloat("Metallic2", &metallic2, 0.0f, 1.0f);
-			sphere2->mMetallic = metallic2;
-
-			float roughness2 = sphere2->mRoughness;
-			ImGui::SliderFloat("Roughness2", &roughness2, 0.0f, 1.0f);
-			sphere2->mRoughness = roughness2;
-
-			float reflectivity2 = sphere2->mReflectivity;
-			ImGui::SliderFloat("Reflectivity2", &reflectivity2, 0.0f, 1.0f);
-			sphere2->mReflectivity = reflectivity2;
-
-			float refractiveIndex2 = sphere2->mRefractiveIndex;
-			ImGui::SliderFloat("Refractive Index2", &refractiveIndex2, 1.0f, 2.0f);
-			sphere2->mRefractiveIndex = refractiveIndex2;
-
-			float transparency2 = sphere2->mTransparency;
-			ImGui::SliderFloat("Transparency2", &transparency2, 0.0f, 1.0f);
-			sphere2->mTransparency = transparency2;
+			for (auto& rayObject : rayTracer.rayObjects)
+			{
+				rayObject->UpdateUI();
+			}
 
 			ImGui::End();
 

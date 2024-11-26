@@ -5,7 +5,7 @@
 class Plane : public RayObject
 {
 public:
-	Plane(glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo);
+	Plane(std::string _name, glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo);
 	~Plane() {}
 
 	bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition) override;

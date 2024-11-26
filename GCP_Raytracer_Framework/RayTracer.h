@@ -18,7 +18,7 @@ public:
 
 	float ComputeAO(glm::vec3 _position, glm::vec3 _normal);
 
-	void SetLights(std::vector<Light>* _lights) { mLights = _lights; }
+	void SetLights(std::vector<Light*> _lights) { mLights = _lights; }
 
 	glm::vec3 mBackgroundColour{ 0, 0, 0.2f };
 
@@ -38,5 +38,5 @@ public:
 	std::vector<glm::vec3> mHemisphereSamples;
 
 	std::vector<RayObject*> rayObjects;
-	std::vector<Light>* mLights;
+	std::vector<Light*> mLights;
 };

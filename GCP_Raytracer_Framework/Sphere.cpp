@@ -2,15 +2,17 @@
 
 #include <iostream>
 
-Sphere::Sphere(glm::vec3 _position, float _radius)
+Sphere::Sphere(std::string _name, glm::vec3 _position, float _radius)
 {
+	mName = _name;
 	mPosition = _position;
 	mRadius = _radius;
 	mAlbedo = glm::vec3(1, 0, 0);
 }
 
-Sphere::Sphere(glm::vec3 _position, float _radius, glm::vec3 _albedo)
+Sphere::Sphere(std::string _name, glm::vec3 _position, float _radius, glm::vec3 _albedo)
 {
+	mName = _name;
 	mPosition = _position;
 	mRadius = _radius;
 	mAlbedo = _albedo;

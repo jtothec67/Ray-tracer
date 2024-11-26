@@ -8,8 +8,8 @@
 class Sphere : public RayObject
 {
 public:
-	Sphere(glm::vec3 _position, float _radius);
-	Sphere(glm::vec3 _position, float _radius, glm::vec3 _albedo);
+	Sphere(std::string _name, glm::vec3 _position, float _radius);
+	Sphere(std::string _name, glm::vec3 _position, float _radius, glm::vec3 _albedo);
 	~Sphere() {}
 
 	bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition) override;

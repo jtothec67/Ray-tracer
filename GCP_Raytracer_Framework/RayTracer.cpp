@@ -40,9 +40,9 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 	glm::vec3 finalPixelCol = glm::vec3(0.f, 0.f, 0.f);
 
 	// Loop through all of the lights and add their contribution to the final pixel colour
-	for (auto& light : *mLights)
+	for (auto& light : mLights)
 	{
-		bool inShadow = false;
+		float shadowFactor = 1.0f;
 
 		if (mShadows)
 		{
@@ -58,26 +58,32 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 				glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.01f);
 
 				// If ray hits, check it's between hit position and the light
-				if (rayObject->RayIntersect(Ray(shadowRayFrom, glm::normalize(light.position - currentHitPos)), hitPos))
+				if (rayObject->RayIntersect(Ray(shadowRayFrom, glm::normalize(light->position - currentHitPos)), hitPos))
 				{
-					if (glm::length(hitPos - currentHitPos) < glm::length(light.position - currentHitPos))
+					if (glm::length(hitPos - currentHitPos) < glm::length(light->position - currentHitPos))
 					{
-						// inShadow set to true so nothing gets added to light contribution of final pixel colour
-						inShadow = true;
-						// Don't need to check more objects because we're in shadow
-						break;
+						// Adjust shadow factor based on transparency
+						shadowFactor *= rayObject->mTransparency;
+
+						// If fully opaque, break out of the loop
+						if (shadowFactor <= 0.0f)
+						{
+							shadowFactor = 0.0f;
+							break;
+						}
 					}
 				}
 			}
 		}
 
-		if (!inShadow)
+		if (shadowFactor > 0.0f)
 		{
 			// Calculate and add light contribution
 			glm::vec3 thisPixelCol = currentRayObject->ShadeAtPosition(currentHitPos, light, _camPos, mPBR);
-			finalPixelCol += thisPixelCol;
+			finalPixelCol += thisPixelCol * shadowFactor;
 		}
 	}
+
 
 	if (mAmbientOcclusion)
 	{
@@ -102,7 +108,6 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		// Trace the reflected ray to get the colour (recursion), add 1 to the depth
 		glm::vec3 reflectionColor = TraceRay(reflectionRay, _camPos, _depth + 1);
 		// Add reflection colour multiplied by reflectivity value of the object
-		finalPixelCol += reflectionColor * currentRayObject->mReflectivity;
 		finalPixelCol = glm::mix(finalPixelCol, reflectionColor, currentRayObject->mReflectivity);
 	}
 
@@ -116,7 +121,6 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		// Trace the refracted ray to get the colour (recursion), add 1 to the depth
 		glm::vec3 refractionColor = TraceRay(refractionRay, _camPos, _depth + 1);
 		// Add refraction colour multiplied by transparency value of the object
-		//finalPixelCol += refractionColor * currentRayObject->mTransparency;
 		finalPixelCol = glm::mix(finalPixelCol, refractionColor, currentRayObject->mTransparency);
 	}
 

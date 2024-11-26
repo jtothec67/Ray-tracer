@@ -1,7 +1,10 @@
 #include "Plane.h"
 
-Plane::Plane(glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo)
+#include <string>
+
+Plane::Plane(std::string _name, glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo)
 {
+	mName = _name;
 	mPosition = _position;
 	mNormal = _normal;
 	mAlbedo = _albedo;

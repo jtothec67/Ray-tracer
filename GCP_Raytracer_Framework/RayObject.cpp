@@ -1,8 +1,11 @@
 #include "RayObject.h"
 
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
 #include <iostream>
 
-glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, Light& _light, glm::vec3 _camPos, bool _pbr)
+glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, Light *_light, glm::vec3 _camPos, bool _pbr)
 {
 	if (mIsLight)
 		return mAlbedo;
@@ -14,28 +17,28 @@ glm::vec3 RayObject::ShadeAtPosition(glm::vec3 _intersectPosition, Light& _light
 	
 }
 
-glm::vec3 RayObject::CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, Light& _light, glm::vec3 _camPos)
+glm::vec3 RayObject::CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, Light* _light, glm::vec3 _camPos)
 {
-    glm::vec3 lightDir = glm::normalize(_light.position - _intersectPosition);
+    glm::vec3 lightDir = glm::normalize(_light->position - _intersectPosition);
 
 	glm::vec3 normal = NormalAtPosition(_intersectPosition);
 	glm::vec3 eyeDir = glm::normalize(_camPos - _intersectPosition);
 
-	glm::vec3 diffuse = (glm::max(glm::dot(normal, lightDir), 0.f)) * mAlbedo * _light.colour;
+	glm::vec3 diffuse = (glm::max(glm::dot(normal, lightDir), 0.f)) * mAlbedo * _light->colour;
 
 	glm::vec3 reflectDir = glm::reflect(-lightDir, normal);
 	float spec = glm::pow(glm::max(glm::dot(eyeDir, reflectDir), 0.f), 32);
-	glm::vec3 specular = spec * mShininess * _light.colour;
+	glm::vec3 specular = spec * mShininess * _light->colour;
 
 	return diffuse + specular;
 }
 
-glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, Light& _light, glm::vec3 _camPos)
+glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, Light* _light, glm::vec3 _camPos)
 {
     glm::vec3 normal = NormalAtPosition(_intersectPosition);
     glm::vec3 eyeDir = glm::normalize(_camPos - _intersectPosition);
 
-    glm::vec3 lightDir = glm::normalize(_light.position - _intersectPosition);
+    glm::vec3 lightDir = glm::normalize(_light->position - _intersectPosition);
 
     glm::vec3 halfVector = glm::normalize(lightDir + eyeDir);
 
@@ -58,11 +61,11 @@ glm::vec3 RayObject::CalculatePBR(glm::vec3 _intersectPosition, Light& _light, g
     float denominator = 4.0f * glm::max(4.0f * NdotL * NdotH, 0.001f);
     glm::vec3 specular = numerator / denominator;
 
-    glm::vec3 ambient = glm::vec3(0.00f) * mAlbedo * _light.colour;
+    glm::vec3 ambient = glm::vec3(0.00f) * mAlbedo * _light->colour;
 
     glm::vec3 colour = (kD * mAlbedo / 3.1415f) + specular;
 
-    return (colour * NdotL + ambient) * _light.colour;
+    return (colour * NdotL + ambient) * _light->colour;
 }
 
 glm::vec3 RayObject::fresnelSchlick(float cosTheta, const glm::vec3& F0) {
@@ -99,4 +102,40 @@ float RayObject::GeometrySmith(const glm::vec3& N, const glm::vec3& V, const glm
     float ggx1 = GeometrySchlickGGX(NdotL, roughness);
 
     return ggx1 * ggx2;
+}
+
+void RayObject::UpdateUI()
+{
+    if (mIsLight)
+		return;
+
+    ImGui::Text(mName.c_str());
+
+    float shiney1 = mShininess;
+    ImGui::SliderFloat(("Shininess(pbr) " + mName).c_str(), &shiney1, 0.0f, 1.0f);
+    mShininess = shiney1;
+
+    glm::vec3 albedo1 = mAlbedo;
+    ImGui::ColorEdit3(("Albedo" + mName).c_str(), &albedo1[0]);
+    mAlbedo = albedo1;
+
+    float metallic1 = mMetallic;
+    ImGui::SliderFloat(("Metallic" + mName).c_str(), &metallic1, 0.0f, 1.0f);
+    mMetallic = metallic1;
+
+    float roughness1 = mRoughness;
+    ImGui::SliderFloat(("Roughness" + mName).c_str(), &roughness1, 0.0f, 1.0f);
+    mRoughness = roughness1;
+
+    float reflectivity1 = mReflectivity;
+    ImGui::SliderFloat(("Reflectivity" + mName).c_str(), &reflectivity1, 0.0f, 1.0f);
+    mReflectivity = reflectivity1;
+
+    float refractiveIndex1 = mRefractiveIndex;
+    ImGui::SliderFloat(("Refractive Index" + mName).c_str(), &refractiveIndex1, 1.0f, 2.0f);
+    mRefractiveIndex = refractiveIndex1;
+
+    float transparency1 = mTransparency;
+    ImGui::SliderFloat(("Transparency" + mName).c_str(), &transparency1, 0.0f, 1.0f);
+    mTransparency = transparency1;
 }
