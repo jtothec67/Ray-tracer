@@ -27,7 +27,7 @@ public:
 	float GeometrySchlickGGX(float NdotV, float roughness);
 	float GeometrySmith(const glm::vec3& N, const glm::vec3& V, const glm::vec3& L, float roughness);
 
-	void UpdateUI();
+	virtual void UpdateUI();
 
 	std::string mName = "Object";
 
@@ -40,7 +40,7 @@ public:
 	float mRefractiveIndex = 1.0f;
 	float mTransparency = 0.0f;
 
-	float mMetallic = 0.5f;
+	float mMetallic = 0.f;
 	float mRoughness = 0.1f;
 
 	bool mIsLight = false;

@@ -111,31 +111,19 @@ void RayObject::UpdateUI()
 
     ImGui::Text(mName.c_str());
 
-    float shiney1 = mShininess;
-    ImGui::SliderFloat(("Shininess(pbr) " + mName).c_str(), &shiney1, 0.0f, 1.0f);
-    mShininess = shiney1;
+    ImGui::SliderFloat(("Shininess(pbr) " + mName).c_str(), &mShininess, 0.0f, 1.0f);
 
-    glm::vec3 albedo1 = mAlbedo;
-    ImGui::ColorEdit3(("Albedo" + mName).c_str(), &albedo1[0]);
-    mAlbedo = albedo1;
+    ImGui::ColorEdit3(("Albedo" + mName).c_str(), &mAlbedo[0]);
 
-    float metallic1 = mMetallic;
-    ImGui::SliderFloat(("Metallic" + mName).c_str(), &metallic1, 0.0f, 1.0f);
-    mMetallic = metallic1;
+    ImGui::SliderFloat(("Metallic" + mName).c_str(), &mMetallic, 0.0f, 1.0f);
 
-    float roughness1 = mRoughness;
-    ImGui::SliderFloat(("Roughness" + mName).c_str(), &roughness1, 0.0f, 1.0f);
-    mRoughness = roughness1;
+    ImGui::SliderFloat(("Roughness" + mName).c_str(), &mRoughness, 0.0f, 1.0f);
 
-    float reflectivity1 = mReflectivity;
-    ImGui::SliderFloat(("Reflectivity" + mName).c_str(), &reflectivity1, 0.0f, 1.0f);
-    mReflectivity = reflectivity1;
+    ImGui::SliderFloat(("Reflectivity" + mName).c_str(), &mReflectivity, 0.0f, 1.0f);
 
-    float refractiveIndex1 = mRefractiveIndex;
-    ImGui::SliderFloat(("Refractive Index" + mName).c_str(), &refractiveIndex1, 1.0f, 2.0f);
-    mRefractiveIndex = refractiveIndex1;
+    ImGui::SliderFloat(("Refractive Index" + mName).c_str(), &mRefractiveIndex, 1.0f, 2.0f);
 
-    float transparency1 = mTransparency;
-    ImGui::SliderFloat(("Transparency" + mName).c_str(), &transparency1, 0.0f, 1.0f);
-    mTransparency = transparency1;
+    ImGui::SliderFloat(("Transparency" + mName).c_str(), &mTransparency, 0.0f, 1.0f);
+
+    ImGui::SliderFloat3(("Position" + mName).c_str(), &mPosition[0], -100, 100);
 }

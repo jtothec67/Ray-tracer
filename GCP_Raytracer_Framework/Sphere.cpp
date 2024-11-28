@@ -1,6 +1,8 @@
 #include "Sphere.h"
 
-#include <iostream>
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
 
 Sphere::Sphere(std::string _name, glm::vec3 _position, float _radius)
 {
@@ -42,4 +44,14 @@ bool Sphere::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)
 glm::vec3 Sphere::NormalAtPosition(glm::vec3 _intersectPosition)
 {
 	return glm::normalize(_intersectPosition - mPosition);
+}
+
+void Sphere::UpdateUI()
+{
+	if (mIsLight) 
+		return;
+
+	RayObject::UpdateUI();
+
+	ImGui::SliderFloat(("Radius" + mName).c_str(), &mRadius, 0.0f, 20.0f);
 }

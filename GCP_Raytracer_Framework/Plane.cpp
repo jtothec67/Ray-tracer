@@ -1,6 +1,8 @@
 #include "Plane.h"
 
-#include <string>
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
 
 Plane::Plane(std::string _name, glm::vec3 _position, glm::vec3 _normal, glm::vec3 _albedo)
 {
@@ -25,5 +27,15 @@ bool Plane::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)
 
 glm::vec3 Plane::NormalAtPosition(glm::vec3 _intersectPosition)
 {
-	return mNormal;
+	return glm::normalize(mNormal);
+}
+
+void Plane::UpdateUI()
+{
+	if (mIsLight)
+		return;
+
+	RayObject::UpdateUI();
+
+	ImGui::SliderFloat3(("Normal" + mName).c_str(), &mNormal[0], -1, 1);
 }

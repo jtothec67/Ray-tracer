@@ -11,6 +11,8 @@ public:
 	bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition) override;
 	glm::vec3 NormalAtPosition(glm::vec3 _intersectPosition) override;
 
+	void UpdateUI() override;
+
 private:
 	glm::vec3 mNormal{ 0 };
 };

@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="GCP_GFX_Framework.cpp" />
     <ClCompile Include="glew.c" />
     <ClCompile Include="Main.cpp" />
@@ -175,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Cylinder.h" />
     <ClInclude Include="GCP_GFX_Framework.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Plane.h" />

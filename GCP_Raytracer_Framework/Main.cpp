@@ -5,6 +5,7 @@
 #include "RayObject.h"
 #include "Sphere.h"
 #include "Plane.h"
+#include "Cylinder.h"
 #include "Light.h"
 #include "Timer.h"
 #include "ThreadPool.h"
@@ -96,6 +97,13 @@ int main(int argc, char* argv[])
 	rayTracer.rayObjects.push_back(rayLightSphere2);
 
 	rayTracer.SetLights(lights);
+
+	Cylinder* cylinder1 = new Cylinder("Cylinder1", glm::vec3(0, 0, -20), 10, 20, glm::vec3(0, 1, 0));
+	cylinder1->mMetallic = 0.0f;
+	cylinder1->mShininess = 0.0f;
+	cylinder1->mRoughness = 1;
+	RayObject* rayCylinder1 = (RayObject*)cylinder1;
+	rayTracer.rayObjects.push_back(rayCylinder1);
 
 	Sphere* sphere1 = new Sphere("Sphere1", glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
 	sphere1->mMetallic = 0.0f;
@@ -201,21 +209,33 @@ int main(int argc, char* argv[])
 				case SDLK_RIGHT:
 					camera.SetRotation(glm::vec3(camera.GetRotation().x, camera.GetRotation().y + 1, camera.GetRotation().z));
 					break;
-				case SDLK_p:
-					Sphere* sphere = new Sphere("New Sphere " + std::to_string(++newBallCount), camera.GetPosition(), 10, glm::vec3(1, 0, 0));
-					sphere->mMetallic = 0;
+				case SDLK_b:
+				{
+					Sphere* sphere = new Sphere("New Sphere " + std::to_string(++newBallCount), -camera.GetPosition(), 10, glm::vec3(1, 0, 0));
 					RayObject* raySphere = (RayObject*)sphere;
 					rayTracer.rayObjects.push_back(raySphere);
 					break;
-				//case SDLK_l:
-				//	// DOESNT WORK
-				//	Light* light = new Light(camera.GetPosition(), glm::vec3(1, 1, 1));
-				//	lights.push_back(light);
-				//	Sphere* lightSphere = new Sphere("Light " + std::to_string(lights.size()), camera.GetPosition(), 2, glm::vec3(1, 1, 1));
-				//	RayObject* rayLightSphere = (RayObject*)&lightSphere;
-				//	rayLightSphere->mIsLight = true;
-				//	rayTracer.rayObjects.push_back(rayLightSphere);
-				//	break;
+				}
+				case SDLK_p:
+				{
+					Plane* plane = new Plane("New Plane", -camera.GetPosition(), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
+					RayObject* rayPlane = (RayObject*)plane;
+					rayTracer.rayObjects.push_back(rayPlane);
+					break;
+				}
+				case SDLK_l:
+				{
+					// DOESNT WORK
+					Light* light = new Light(-camera.GetPosition(), glm::vec3(1, 1, 1));
+					lights.push_back(light);
+
+					Sphere* lightSphere = new Sphere("Light " + std::to_string(lights.size()), -camera.GetPosition(), 2, glm::vec3(1, 1, 1));
+					RayObject* rayLightSphere = (RayObject*)lightSphere;
+					rayLightSphere->mIsLight = true;
+					rayTracer.rayObjects.push_back(rayLightSphere);
+					rayTracer.SetLights(lights);
+					break;
+				}
 				}
 			}
 		}
