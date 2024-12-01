@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
 	rayTracer.SetLights(lights);
 
-	Cylinder* cylinder1 = new Cylinder("Cylinder1", glm::vec3(0, 0, -20), 10, 20, glm::vec3(0, 1, 0));
+	Cylinder* cylinder1 = new Cylinder("Cylinder1", glm::vec3(0, 10, -55), 10, 20, glm::vec3(0, 1, 0));
 	cylinder1->mMetallic = 0.0f;
 	cylinder1->mShininess = 0.0f;
 	cylinder1->mRoughness = 1;
@@ -192,10 +192,10 @@ int main(int argc, char* argv[])
 					camera.SetPosition(camera.GetPosition() - camera.GetRight());
 					break;
 				case SDLK_q:
-					camera.SetPosition(camera.GetPosition() - camera.GetUp());
+					camera.SetPosition(camera.GetPosition() - glm::vec3(0, 1, 0));
 					break;
 				case SDLK_e:
-					camera.SetPosition(camera.GetPosition() + camera.GetUp());
+					camera.SetPosition(camera.GetPosition() + glm::vec3(0, 1, 0));
 					break;
 				case SDLK_UP:
 					camera.SetRotation(glm::vec3(camera.GetRotation().x - 1, camera.GetRotation().y, camera.GetRotation().z));
@@ -225,7 +225,6 @@ int main(int argc, char* argv[])
 				}
 				case SDLK_l:
 				{
-					// DOESNT WORK
 					Light* light = new Light(-camera.GetPosition(), glm::vec3(1, 1, 1));
 					lights.push_back(light);
 
@@ -234,6 +233,13 @@ int main(int argc, char* argv[])
 					rayLightSphere->mIsLight = true;
 					rayTracer.rayObjects.push_back(rayLightSphere);
 					rayTracer.SetLights(lights);
+					break;
+				}
+				case SDLK_c:
+				{
+					Cylinder* cylinder = new Cylinder("New Cylinder", -camera.GetPosition(), 10, 20, glm::vec3(0, 1, 0));
+					RayObject* rayCylinder = (RayObject*)cylinder;
+					rayTracer.rayObjects.push_back(rayCylinder);
 					break;
 				}
 				}
