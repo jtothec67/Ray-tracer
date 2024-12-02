@@ -2,44 +2,42 @@
 
 ThreadPool::ThreadPool(size_t numThreads) : stop(false), activeTasks(0)
 {
-    for (size_t i = 0; i < numThreads; ++i) {
-        workers.emplace_back([this] {
-            for (;;) {
+    for (size_t i = 0; i < numThreads; ++i)
+    {
+        workers.emplace_back([this] 
+        {
+            while (true) 
+            {
                 std::function<void()> task;
 
                 {
-                    std::unique_lock<std::mutex> lock(this->queueMutex);
-                    this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
-                    if (this->stop && this->tasks.empty())
+                    std::unique_lock<std::mutex> lock(queueMutex);
+                    condition.wait(lock, [this] { return stop || !tasks.empty(); });
+                    if (stop && tasks.empty())
                         return;
-                    task = std::move(this->tasks.front());
-                    this->tasks.pop();
-                    ++this->activeTasks;
+                    task = std::move(tasks.front());
+                    tasks.pop();
+                    ++activeTasks;
                 }
 
                 task();
 
                 {
-                    std::unique_lock<std::mutex> lock(this->queueMutex);
-                    --this->activeTasks;
-                    if (this->tasks.empty() && this->activeTasks == 0) {
-                        this->completionCondition.notify_all();
+                    std::unique_lock<std::mutex> lock(queueMutex);
+                    --activeTasks;
+                    if (tasks.empty() && activeTasks == 0)
+                    {
+                        completionCondition.notify_all();
                     }
                 }
             }
-            });
+        });
     }
 }
 
 ThreadPool::~ThreadPool()
 {
-    {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        stop = true;
-    }
-    condition.notify_all();
-    for (std::thread& worker : workers)
-        worker.join();
+    Shutdown();
 }
 
 void ThreadPool::EnqueueTask(std::function<void()> task)

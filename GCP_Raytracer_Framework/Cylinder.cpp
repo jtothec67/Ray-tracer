@@ -153,5 +153,5 @@ void Cylinder::UpdateUI()
 
 	ImGui::SliderFloat(("Radius" + mName).c_str(), &mRadius, 0.0f, 20.0f);
 	ImGui::SliderFloat(("Height" + mName).c_str(), &mHeight, 0.0f, 20.0f);
-	ImGui::SliderFloat3(("Rotation" + mName).c_str(), &mAxis[0], 0.0f, 1.0f);
+	ImGui::SliderFloat3(("Rotation" + mName).c_str(), &mAxis[0], -1.0f, 1.0f);
 }

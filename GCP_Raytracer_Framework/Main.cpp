@@ -17,6 +17,8 @@
 #include <vector>
 #include <thread>
 
+void InitialiseScene1(RayTracer& _rayTracer);
+
 void TracePixels(int _fromy, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
 	for (int y = _fromy; y <= _toy; ++y)
@@ -78,59 +80,7 @@ int main(int argc, char* argv[])
 
 	RayTracer rayTracer;
 
-	std::vector<Light*> lights;
-
-	glm::vec3 lightPos1 = glm::vec3(-40, 0, -40);
-	Light* light1 = new Light(lightPos1, glm::vec3(1, 1, 1));
-	lights.push_back(light1);
-	Sphere lightSphere1("Light1", lightPos1, 2, glm::vec3(1, 1, 1));
-	RayObject* rayLightSphere1 = (RayObject*)&lightSphere1;
-	rayLightSphere1->mIsLight = true;
-	rayTracer.rayObjects.push_back(rayLightSphere1);
-
-	glm::vec3 lightPos2 = glm::vec3(45, 10, -50);
-	Light* light2 = new Light(lightPos2, glm::vec3(1, 1, 1));
-	lights.push_back(light2);
-	Sphere lightSphere2("Light2", lightPos2, 2, glm::vec3(1, 1, 1));
-	RayObject* rayLightSphere2 = (RayObject*)&lightSphere2;
-	rayLightSphere2->mIsLight = true;
-	rayTracer.rayObjects.push_back(rayLightSphere2);
-
-	rayTracer.SetLights(lights);
-
-	Cylinder* cylinder1 = new Cylinder("Cylinder1", glm::vec3(0, 10, -55), 10, 20, glm::vec3(0, 1, 0));
-	cylinder1->mMetallic = 0.0f;
-	cylinder1->mShininess = 0.0f;
-	cylinder1->mRoughness = 1;
-	RayObject* rayCylinder1 = (RayObject*)cylinder1;
-	rayTracer.rayObjects.push_back(rayCylinder1);
-
-	Sphere* sphere1 = new Sphere("Sphere1", glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
-	sphere1->mMetallic = 0.0f;
-	sphere1->mShininess = 0.0f;
-	sphere1->mRoughness = 1;
-	RayObject* raySphere1 = (RayObject*)sphere1;
-	rayTracer.rayObjects.push_back(raySphere1);
-
-	Sphere* sphere2 = new Sphere("Sphere2", glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0));
-	sphere2->mMetallic = 0;
-	RayObject* raySphere2 = (RayObject*)sphere2;
-	rayTracer.rayObjects.push_back(raySphere2);
-
-	Plane plane1("Plane1", glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
-	plane1.mShininess = 0;
-	plane1.mMetallic = 0;
-	plane1.mRoughness = 1;
-	RayObject* rayPlane1 = (RayObject*)&plane1;
-	rayTracer.rayObjects.push_back(rayPlane1);
-
-	Plane plane2("Plane2", glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(1, 1, 1));
-	plane2.mShininess = 0;
-	plane2.mMetallic = 0;
-	plane2.mRoughness = 1;
-	RayObject* rayPlane2 = (RayObject*)&plane2;
-	rayTracer.rayObjects.push_back(rayPlane2);
-
+	InitialiseScene1(rayTracer);
 
 	// Setting up the GUI system
 	IMGUI_CHECKVERSION();
@@ -226,13 +176,12 @@ int main(int argc, char* argv[])
 				case SDLK_l:
 				{
 					Light* light = new Light(-camera.GetPosition(), glm::vec3(1, 1, 1));
-					lights.push_back(light);
+					rayTracer.mLights.push_back(light);
 
-					Sphere* lightSphere = new Sphere("Light " + std::to_string(lights.size()), -camera.GetPosition(), 2, glm::vec3(1, 1, 1));
+					Sphere* lightSphere = new Sphere("Light " + std::to_string(rayTracer.mLights.size()), -camera.GetPosition(), 2, glm::vec3(1, 1, 1));
 					RayObject* rayLightSphere = (RayObject*)lightSphere;
 					rayLightSphere->mIsLight = true;
 					rayTracer.rayObjects.push_back(rayLightSphere);
-					rayTracer.SetLights(lights);
 					break;
 				}
 				case SDLK_c:
@@ -340,4 +289,56 @@ int main(int argc, char* argv[])
 	threadPool.Shutdown();
 
 	return 0;
+}
+
+void InitialiseScene1(RayTracer& _rayTracer)
+{
+	glm::vec3 lightPos1 = glm::vec3(-40, 0, -40);
+	Light* light1 = new Light(lightPos1, glm::vec3(1, 1, 1));
+	_rayTracer.mLights.push_back(light1);
+	Sphere* lightSphere1 = new Sphere("Light1", lightPos1, 2, glm::vec3(1, 1, 1));
+	RayObject* rayLightSphere1 = (RayObject*)lightSphere1;
+	rayLightSphere1->mIsLight = true;
+	_rayTracer.rayObjects.push_back(rayLightSphere1);
+
+	glm::vec3 lightPos2 = glm::vec3(45, 10, -50);
+	Light* light2 = new Light(lightPos2, glm::vec3(1, 1, 1));
+	_rayTracer.mLights.push_back(light2);
+	Sphere* lightSphere2 = new Sphere("Light2", lightPos2, 2, glm::vec3(1, 1, 1));
+	RayObject* rayLightSphere2 = (RayObject*)lightSphere2;
+	rayLightSphere2->mIsLight = true;
+	_rayTracer.rayObjects.push_back(rayLightSphere2);
+
+	Cylinder* cylinder1 = new Cylinder("Cylinder1", glm::vec3(0, 10, -55), 10, 20, glm::vec3(0, 1, 0));
+	cylinder1->mMetallic = 0.0f;
+	cylinder1->mShininess = 0.0f;
+	cylinder1->mRoughness = 1;
+	RayObject* rayCylinder1 = (RayObject*)cylinder1;
+	_rayTracer.rayObjects.push_back(rayCylinder1);
+
+	Sphere* sphere1 = new Sphere("Sphere1", glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
+	sphere1->mMetallic = 0.0f;
+	sphere1->mShininess = 0.0f;
+	sphere1->mRoughness = 1;
+	RayObject* raySphere1 = (RayObject*)sphere1;
+	_rayTracer.rayObjects.push_back(raySphere1);
+
+	Sphere* sphere2 = new Sphere("Sphere2", glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0));
+	sphere2->mMetallic = 0;
+	RayObject* raySphere2 = (RayObject*)sphere2;
+	_rayTracer.rayObjects.push_back(raySphere2);
+
+	Plane* plane1 = new Plane("Plane1", glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
+	plane1->mShininess = 0;
+	plane1->mMetallic = 0;
+	plane1->mRoughness = 1;
+	RayObject* rayPlane1 = (RayObject*)plane1;
+	_rayTracer.rayObjects.push_back(rayPlane1);
+
+	Plane* plane2 = new Plane("Plane2", glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(1, 1, 1));
+	plane2->mShininess = 0;
+	plane2->mMetallic = 0;
+	plane2->mRoughness = 1;
+	RayObject* rayPlane2 = (RayObject*)plane2;
+	_rayTracer.rayObjects.push_back(rayPlane2);
 }

@@ -111,7 +111,8 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		finalPixelCol = glm::mix(finalPixelCol, reflectionColor, currentRayObject->mReflectivity);
 	}
 
-
+	// Transparency / refraction
+	// (transparency linked with refractions as a non refractive transparent object just refracts the rays to the same direction as they already were)
 	if (_depth < mMaxDepth && currentRayObject->mTransparency > 0.01f)
 	{
 		// Calculate refraction direction (refract takes incident direction, normal, and ratio of RI coming from and going in to (we just assume 1 which is RI of air))
