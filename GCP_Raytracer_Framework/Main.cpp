@@ -11,13 +11,14 @@
 #include "ThreadPool.h"
 
 #include <imgui.h>
-#include <imgui_impl_sdl.h>
+#include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
 
 #include <vector>
 #include <thread>
 
 void InitialiseScene1(RayTracer& _rayTracer);
+void InitialiseScene2(RayTracer& _rayTracer);
 
 void TracePixels(int _fromy, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
@@ -88,6 +89,8 @@ int main(int argc, char* argv[])
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
 	ImGui::StyleColorsDark();
+	
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	const char* glslVersion = "#version 430";
 	ImGui_ImplSDL2_InitForOpenGL(_myFramework.GetWindow(), _myFramework.GetGLContext());
@@ -102,7 +105,7 @@ int main(int argc, char* argv[])
 	float fps = 0.f;
 
 	int numTasks = 16;
-	ThreadPool threadPool(16);
+	ThreadPool threadPool(32);
 
 	int newBallCount = 0;
 
@@ -262,6 +265,15 @@ int main(int argc, char* argv[])
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+			SDL_GLContext baclup_current_context = SDL_GL_GetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			SDL_GL_MakeCurrent(backup_current_window, baclup_current_context);
+		}
+
 		_myFramework.SwapWindow();
 
 		fps = 1000 / timer.GetElapsedMilliseconds();
@@ -341,4 +353,9 @@ void InitialiseScene1(RayTracer& _rayTracer)
 	plane2->mRoughness = 1;
 	RayObject* rayPlane2 = (RayObject*)plane2;
 	_rayTracer.rayObjects.push_back(rayPlane2);
+}
+
+void InitialiseScene2(RayTracer& _rayTracer)
+{
+
 }

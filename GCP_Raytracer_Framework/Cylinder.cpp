@@ -1,7 +1,7 @@
 #include "Cylinder.h"
 
 #include <imgui.h>
-#include <imgui_impl_sdl.h>
+#include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
 
 Cylinder::Cylinder(std::string _name, glm::vec3 _position, float _radius, float _height)

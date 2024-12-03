@@ -48,14 +48,11 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDKs\IMGUI\imgui_impl_sdlrenderer.cpp">
-      <Filter>Source Files\IMGUI</Filter>
+    <ClCompile Include="ThreadPool.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDKs\IMGUI\imgui_tables.cpp">
-      <Filter>Source Files\IMGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="SDKs\IMGUI\imgui_widgets.cpp">
-      <Filter>Source Files\IMGUI</Filter>
+    <ClCompile Include="Cylinder.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SDKs\IMGUI\imgui.cpp">
       <Filter>Source Files\IMGUI</Filter>
@@ -66,14 +63,17 @@
     <ClCompile Include="SDKs\IMGUI\imgui_impl_opengl3.cpp">
       <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
-    <ClCompile Include="SDKs\IMGUI\imgui_impl_sdl.cpp">
+    <ClCompile Include="SDKs\IMGUI\imgui_impl_sdl2.cpp">
       <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadPool.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="SDKs\IMGUI\imgui_impl_sdlrenderer2.cpp">
+      <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Cylinder.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="SDKs\IMGUI\imgui_tables.cpp">
+      <Filter>Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="SDKs\IMGUI\imgui_widgets.cpp">
+      <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +112,12 @@
     <ClInclude Include="Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cylinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="SDKs\IMGUI\imconfig.h">
       <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
@@ -124,10 +130,10 @@
     <ClInclude Include="SDKs\IMGUI\imgui_impl_opengl3_loader.h">
       <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
-    <ClInclude Include="SDKs\IMGUI\imgui_impl_sdl.h">
+    <ClInclude Include="SDKs\IMGUI\imgui_impl_sdl2.h">
       <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
-    <ClInclude Include="SDKs\IMGUI\imgui_impl_sdlrenderer.h">
+    <ClInclude Include="SDKs\IMGUI\imgui_impl_sdlrenderer2.h">
       <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
     <ClInclude Include="SDKs\IMGUI\imgui_internal.h">
@@ -141,12 +147,6 @@
     </ClInclude>
     <ClInclude Include="SDKs\IMGUI\imstb_truetype.h">
       <Filter>Header Files\IMGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cylinder.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
