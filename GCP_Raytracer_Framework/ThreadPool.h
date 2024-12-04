@@ -10,6 +10,7 @@ public:
     ThreadPool(size_t numThreads);
     ~ThreadPool();
 
+	void InitialiseThreads(size_t numThreads);
     void EnqueueTask(std::function<void()> task);
     void WaitForCompletion();
     void Shutdown();

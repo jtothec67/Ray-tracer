@@ -103,7 +103,8 @@ int main(int argc, char* argv[])
 	float fps = 0.f;
 
 	int numTasks = 16;
-	ThreadPool threadPool(32);
+	int numThreads = 16;
+	ThreadPool threadPool(numThreads);
 
 	int newBallCount = 0;
 
@@ -223,6 +224,15 @@ int main(int argc, char* argv[])
 			ImGui::SliderInt("Number of tasks", &tasks, 0, 128);
 			numTasks = tasks;
 
+			int threads = numThreads;
+			ImGui::SliderInt("Number of threads", &threads, 0, 128);
+			if (threads != numThreads)
+			{
+				threadPool.Shutdown();
+				threadPool.InitialiseThreads(threads);
+			}
+			numThreads = threads;
+
 			bool pbr = rayTracer.mPBR;
 			ImGui::Checkbox("PBR", &pbr);
 			rayTracer.mPBR = pbr;
@@ -305,9 +315,6 @@ int main(int argc, char* argv[])
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
-
-	// Shutdown thread pool
-	threadPool.Shutdown();
 
 	return 0;
 }
