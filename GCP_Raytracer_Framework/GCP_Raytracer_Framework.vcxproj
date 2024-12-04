@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="GCP_GFX_Framework.cpp" />
@@ -175,6 +176,7 @@
     <Text Include="VertShader.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Box.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cylinder.h" />
     <ClInclude Include="GCP_GFX_Framework.h" />

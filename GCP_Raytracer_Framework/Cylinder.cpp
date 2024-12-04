@@ -23,92 +23,116 @@ Cylinder::Cylinder(std::string _name, glm::vec3 _position, float _radius, float 
 
 bool Cylinder::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)
 {
-    // Ray origin and direction
-    glm::vec3 rayOrigin = _ray.origin;
-    glm::vec3 rayDirection = glm::normalize(_ray.direction);
+    glm::vec3 axis = glm::normalize(mAxis);
 
-    // Cylinder properties
-    glm::vec3 cylinderAxis = glm::normalize(mAxis);
-    glm::vec3 cylinderBase = mPosition;
-    float radius = mRadius;
-    float height = mHeight;
+    // Check if the ray starts inside the cylinder
+    glm::vec3 toRayOrigin = _ray.origin - mPosition;
+    float projection = glm::dot(toRayOrigin, axis);
+    glm::vec3 projectedPoint = mPosition + projection * axis;
+    float distanceToAxis = glm::length(_ray.origin - projectedPoint);
 
-    // Check if the ray origin is inside the cylinder
-    glm::vec3 deltaP = rayOrigin - cylinderBase;
-    float projectionLength = glm::dot(deltaP, cylinderAxis);
-    glm::vec3 closestPointOnAxis = cylinderBase + projectionLength * cylinderAxis;
-    float distanceToAxis = glm::length(rayOrigin - closestPointOnAxis);
-
-    if (distanceToAxis < radius && projectionLength >= 0 && projectionLength <= height)
+    if (distanceToAxis < mRadius && projection >= 0.0f && projection <= mHeight)
     {
-        return false;
+        return false; // Ray starts inside the cylinder
     }
 
-    // Calculate the quadratic coefficients for the infinite cylinder
-    glm::vec3 d = rayDirection - glm::dot(rayDirection, cylinderAxis) * cylinderAxis;
-    glm::vec3 deltaPProj = deltaP - glm::dot(deltaP, cylinderAxis) * cylinderAxis;
+    // Transform the ray to the cylinder's local space
+    glm::vec3 d = _ray.direction - glm::dot(_ray.direction, axis) * axis;
+    glm::vec3 o = _ray.origin - mPosition - glm::dot(_ray.origin - mPosition, axis) * axis;
 
-    float a = glm::dot(d, d);
-    float b = 2.0f * glm::dot(d, deltaPProj);
-    float c = glm::dot(deltaPProj, deltaPProj) - radius * radius;
+    float A = glm::dot(d, d);
+    float B = 2.0f * glm::dot(d, o);
+    float C = glm::dot(o, o) - mRadius * mRadius;
 
-    // Solve the quadratic equation
-    float discriminant = b * b - 4 * a * c;
-    float t = -1.0f;
-    if (discriminant >= 0)
+    float discriminant = B * B - 4.0f * A * C;
+
+    float tSide = -1.0f;
+    if (discriminant >= 0.0f)
     {
         float sqrtDiscriminant = std::sqrt(discriminant);
-        float t1 = (-b - sqrtDiscriminant) / (2 * a);
-        float t2 = (-b + sqrtDiscriminant) / (2 * a);
+        float t1 = (-B - sqrtDiscriminant) / (2.0f * A);
+        float t2 = (-B + sqrtDiscriminant) / (2.0f * A);
 
-        // Find the nearest valid intersection
-        t = t1;
-        if (t < 0 || (t2 < t && t2 >= 0))
+        if (t1 > t2) std::swap(t1, t2);
+
+        float t = t1;
+        if (t < 0.0f)
         {
             t = t2;
-        }
-
-        if (t >= 0)
-        {
-            // Calculate the intersection position
-            glm::vec3 intersectPos = rayOrigin + t * rayDirection;
-
-            // Check if the intersection is within the cylinder's height
-            float y = glm::dot(intersectPos - cylinderBase, cylinderAxis);
-            if (y >= 0 && y <= height)
+            if (t >= 0.0f)
             {
-                _intersectPosition = intersectPos;
-                return true;
+                glm::vec3 localIntersectPos = _ray.origin + t * _ray.direction;
+                float height = glm::dot(localIntersectPos - mPosition, axis);
+                if (height >= 0.0f && height <= mHeight)
+                {
+                    tSide = t;
+                }
+            }
+        }
+        else 
+        {
+            glm::vec3 localIntersectPos = _ray.origin + t * _ray.direction;
+            float height = glm::dot(localIntersectPos - mPosition, axis);
+            if (height >= 0.0f && height <= mHeight)
+            {
+                tSide = t;
             }
         }
     }
 
     // Check for intersection with the top and bottom caps
-    glm::vec3 topCenter = cylinderBase + height * cylinderAxis;
-    float tCap;
+    float tCapBottom = -1.0f;
+    float tCapTop = -1.0f;
+    glm::vec3 capCenter;
+    glm::vec3 capNormal = axis;
 
     // Bottom cap
-    tCap = glm::dot(cylinderBase - rayOrigin, cylinderAxis) / glm::dot(rayDirection, cylinderAxis);
-    if (tCap >= 0)
-    {
-        glm::vec3 intersectPos = rayOrigin + tCap * rayDirection;
-        if (glm::length(intersectPos - cylinderBase) <= radius)
+    capCenter = mPosition;
+    float tCap = glm::dot(capCenter - _ray.origin, capNormal) / glm::dot(_ray.direction, capNormal);
+    if (tCap >= 0.0f) {
+        glm::vec3 intersectCap = _ray.origin + tCap * _ray.direction;
+        if (glm::length(intersectCap - capCenter) <= mRadius)
         {
-            _intersectPosition = intersectPos;
-            return true;
+            tCapBottom = tCap;
         }
     }
 
     // Top cap
-    tCap = glm::dot(topCenter - rayOrigin, cylinderAxis) / glm::dot(rayDirection, cylinderAxis);
-    if (tCap >= 0)
+    capCenter = mPosition + axis * mHeight;
+    tCap = glm::dot(capCenter - _ray.origin, capNormal) / glm::dot(_ray.direction, capNormal);
+    if (tCap >= 0.0f)
     {
-        glm::vec3 intersectPos = rayOrigin + tCap * rayDirection;
-        if (glm::length(intersectPos - topCenter) <= radius)
+        glm::vec3 intersectCap = _ray.origin + tCap * _ray.direction;
+        if (glm::length(intersectCap - capCenter) <= mRadius)
         {
-            _intersectPosition = intersectPos;
-            return true;
+            tCapTop = tCap;
         }
+    }
+
+    // Determine the closest intersection
+    float tMin = std::numeric_limits<float>::max();
+    bool intersected = false;
+
+    if (tSide >= 0.0f && tSide < tMin)
+    {
+        tMin = tSide;
+        intersected = true;
+    }
+    if (tCapBottom >= 0.0f && tCapBottom < tMin)
+    {
+        tMin = tCapBottom;
+        intersected = true;
+    }
+    if (tCapTop >= 0.0f && tCapTop < tMin)
+    {
+        tMin = tCapTop;
+        intersected = true;
+    }
+
+    if (intersected)
+    {
+        _intersectPosition = _ray.origin + tMin * _ray.direction;
+        return true;
     }
 
     return false;

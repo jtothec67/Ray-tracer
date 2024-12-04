@@ -75,6 +75,9 @@
     <ClCompile Include="SDKs\IMGUI\imgui_widgets.cpp">
       <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
+    <ClCompile Include="Box.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="FragShader.txt">
@@ -147,6 +150,9 @@
     </ClInclude>
     <ClInclude Include="SDKs\IMGUI\imstb_truetype.h">
       <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Box.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -22,7 +22,7 @@ public:
 
 	glm::vec3 mBackgroundColour{ 0, 0, 0.2f };
 
-	glm::vec3 mAmbientColour{ 0.05f, 0.05f, 0.05f };
+	glm::vec3 mAmbientColour{ 0.08f, 0.08f, 0.08f };
 
 	bool mPBR = true;
 
