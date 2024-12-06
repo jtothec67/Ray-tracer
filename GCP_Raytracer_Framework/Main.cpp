@@ -220,6 +220,20 @@ int main(int argc, char* argv[])
 
 			ImGui::Text("FPS: %s", std::to_string(fps).c_str());
 
+			if (ImGui::Button("Scene 1"))
+			{
+				rayTracer.rayObjects.clear();
+				rayTracer.mLights.clear();
+				InitialiseScene1(rayTracer);
+			}
+
+			if (ImGui::Button("Scene 2"))
+			{
+				rayTracer.rayObjects.clear();
+				rayTracer.mLights.clear();
+				InitialiseScene2(rayTracer);
+			}
+
 			int tasks = numTasks;
 			ImGui::SliderInt("Number of tasks", &tasks, 0, 128);
 			numTasks = tasks;
@@ -250,7 +264,7 @@ int main(int argc, char* argv[])
 			rayTracer.mAmbientColour = ambientColour;
 
 			float aoStrength = rayTracer.mAOStrength;
-			ImGui::SliderFloat("AO Strength", &aoStrength, 0.0f, 1.0f);
+			ImGui::SliderFloat("AO Strength", &aoStrength, 0.0f, 2.0f);
 			rayTracer.mAOStrength = aoStrength;
 
 			float aoRadius = rayTracer.mAORadius;
@@ -339,9 +353,7 @@ void InitialiseScene1(RayTracer& _rayTracer)
 
 	Box* box1 = new Box("Box1", glm::vec3(-46.3, 33, -67), glm::vec3(20, 20, 20), glm::vec3(0, 0, 1));
 	box1->SetAxis(glm::vec3(1, -0.36, 0.58));
-	box1->mMetallic = 0.0f;
 	box1->mShininess = 0.0f;
-	box1->mRoughness = 1;
 	box1->mReflectivity = 0.7f;
 	RayObject* rayBox1 = (RayObject*)box1;
 	_rayTracer.rayObjects.push_back(rayBox1);
@@ -354,29 +366,23 @@ void InitialiseScene1(RayTracer& _rayTracer)
 	_rayTracer.rayObjects.push_back(rayCylinder1);
 
 	Sphere* sphere1 = new Sphere("Sphere1", glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
-	sphere1->mMetallic = 0.0f;
 	sphere1->mShininess = 0.0f;
-	sphere1->mRoughness = 1;
 	sphere1->mTransparency = 0.56f;
 	sphere1->mRefractiveIndex = 1.15f;
 	RayObject* raySphere1 = (RayObject*)sphere1;
 	_rayTracer.rayObjects.push_back(raySphere1);
 
 	Sphere* sphere2 = new Sphere("Sphere2", glm::vec3(5, -5, -62), 10, glm::vec3(1, 0, 0));
-	sphere2->mMetallic = 0;
 	RayObject* raySphere2 = (RayObject*)sphere2;
 	_rayTracer.rayObjects.push_back(raySphere2);
 
 	Plane* plane1 = new Plane("Plane1", glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
 	plane1->mShininess = 0;
-	plane1->mMetallic = 0;
-	plane1->mRoughness = 1;
 	RayObject* rayPlane1 = (RayObject*)plane1;
 	_rayTracer.rayObjects.push_back(rayPlane1);
 
 	Plane* plane2 = new Plane("Plane2", glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(1, 1, 1));
 	plane2->mShininess = 0;
-	plane2->mMetallic = 0;
 	plane2->mRoughness = 1;
 	RayObject* rayPlane2 = (RayObject*)plane2;
 	_rayTracer.rayObjects.push_back(rayPlane2);
@@ -384,5 +390,39 @@ void InitialiseScene1(RayTracer& _rayTracer)
 
 void InitialiseScene2(RayTracer& _rayTracer)
 {
+	glm::vec3 sphereColor = glm::vec3(1, 1, 1);
+	float sphereRadius = 1.0f;
+	float sphereSpacing = 2.01f; // Slightly more than diameter to avoid overlap
+	float sphereShininess = 0.0f;
+	int gridSize = 7; // 7x7 grid of spheres
+	int offSet = -3;
 
+	for (int x = 0 + offSet; x < gridSize + offSet; ++x)
+	{
+		for (int y = 0 + offSet + 0.5; y < gridSize + offSet - 1; ++y)
+		{
+			glm::vec3 position = glm::vec3(x * sphereSpacing, y * sphereSpacing, -10);
+			Sphere* sphere = new Sphere("Sphere " + std::to_string(_rayTracer.rayObjects.size()), position, sphereRadius, sphereColor);
+			sphere->mMetallic = 0.0f;
+			sphere->mRoughness = 1.0f;
+			sphere->mShininess = sphereShininess;
+			RayObject* raySphere = (RayObject*)sphere;
+			_rayTracer.rayObjects.push_back(raySphere);
+		}
+	}
+
+	glm::vec3 planePosition = glm::vec3(0, 0, -10-sphereSpacing);
+	Plane* plane = new Plane("Plane", planePosition, glm::vec3(0, 0, 1), sphereColor);
+	plane->mMetallic = 0.0f;
+	plane->mRoughness = 1.0f;
+	RayObject* rayPlane = (RayObject*)plane;
+	_rayTracer.rayObjects.push_back(rayPlane);
+
+	glm::vec3 lightPosition = glm::vec3(0, 0, 0);
+	Light* light = new Light("Light", lightPosition, glm::vec3(1, 1, 1));
+	_rayTracer.mLights.push_back(light);
+	Sphere* lightSphere = new Sphere("LightSphere", lightPosition, 2, glm::vec3(1, 1, 1));
+	lightSphere->mIsLight = true;
+	RayObject* rayLightSphere = (RayObject*)lightSphere;
+	_rayTracer.rayObjects.push_back(rayLightSphere);
 }

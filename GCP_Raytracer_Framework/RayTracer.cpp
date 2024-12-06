@@ -138,9 +138,16 @@ void RayTracer::GenerateHemisphereSamples(int _numSamples)
 	for (int i = 0; i < _numSamples; ++i)
 	{
 		float u = static_cast<float>(i) / _numSamples;
-		float v = static_cast<float>(i) / _numSamples;
-		float theta = 2 * 3.1415 * u;
-		float phi = acos(2 * v - 1);
+		float v = 0;
+		float p = 0.5f;
+		for (int j = i; j > 0; p *= 0.5f, j >>= 1)
+		{
+			if (j & 1)
+				v += p;
+		}
+
+		float theta = 2 * 3.1415f * v;
+		float phi = acos(1 - 2 * u);
 
 		float x = sin(phi) * cos(theta);
 		float y = sin(phi) * sin(theta);

@@ -41,7 +41,7 @@ public:
 	float mTransparency = 0.0f;
 
 	float mMetallic = 0.f;
-	float mRoughness = 0.1f;
+	float mRoughness = 1.f;
 
 	bool mIsLight = false;
 };
