@@ -26,6 +26,7 @@ public:
 	glm::vec3 GetRight();
 	glm::vec3 GetUp();
 
+private:
 	glm::vec3 position{ 0.f };
 	glm::vec3 rotation{ 0.f };
 

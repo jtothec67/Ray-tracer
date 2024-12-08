@@ -12,6 +12,10 @@ public:
 	bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition) override;
 	glm::vec3 NormalAtPosition(glm::vec3 _intersectPosition) override;
 
+	void SetAxis(glm::vec3 _axis) { mAxis = _axis; }
+	void SetRadius(float _radius) { mRadius = _radius; }
+	void SetHeight(float _height) { mHeight = _height; }
+
 	void UpdateUI() override;
 
 private:

@@ -27,8 +27,29 @@ public:
 	float GeometrySchlickGGX(float NdotV, float roughness);
 	float GeometrySmith(const glm::vec3& N, const glm::vec3& V, const glm::vec3& L, float roughness);
 
+	glm::vec3 GetPosition() { return mPosition; }
+	glm::vec3 GetAlbedo() { return mAlbedo; }
+	float GetShininess() { return mShininess; }
+	float GetReflectivity() { return mReflectivity; }
+	float GetRefractiveIndex() { return mRefractiveIndex; }
+	float GetTransparency() { return mTransparency; }
+	float GetMetallic() { return mMetallic; }
+	float GetRoughness() { return mRoughness; }
+	bool IsLight() { return mIsLight; }
+
+	void SetPosition(glm::vec3 _position) { mPosition = _position; }
+	void SetAlbedo(glm::vec3 _albedo) { mAlbedo = _albedo; }
+	void SetShininess(float _shininess) { mShininess = _shininess; }
+	void SetReflectivity(float _reflectivity) { mReflectivity = _reflectivity; }
+	void SetRefractiveIndex(float _refractiveIndex) { mRefractiveIndex = _refractiveIndex; }
+	void SetTransparency(float _transparency) { mTransparency = _transparency; }
+	void SetMetallic(float _metallic) { mMetallic = _metallic; }
+	void SetRoughness(float _roughness) { mRoughness = _roughness; }
+	void IsLight(bool _isLight) { mIsLight = _isLight; }
+
 	virtual void UpdateUI();
 
+protected:
 	std::string mName = "Object";
 
 	glm::vec3 mPosition{ 0 };

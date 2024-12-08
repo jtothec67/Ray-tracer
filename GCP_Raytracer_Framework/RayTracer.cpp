@@ -50,7 +50,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 			for (auto rayObject : rayObjects)
 			{
 				// Skip light objects
-				if (rayObject->mIsLight)
+				if (rayObject->IsLight())
 					continue;
 
 				glm::vec3 hitPos;
@@ -58,12 +58,12 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 				glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.01f);
 
 				// If ray hits, check it's between hit position and the light
-				if (rayObject->RayIntersect(Ray(shadowRayFrom, glm::normalize(light->position - currentHitPos)), hitPos))
+				if (rayObject->RayIntersect(Ray(shadowRayFrom, glm::normalize(light->GetPosition() - currentHitPos)), hitPos))
 				{
-					if (glm::length(hitPos - currentHitPos) < glm::length(light->position - currentHitPos))
+					if (glm::length(hitPos - currentHitPos) < glm::length(light->GetPosition() - currentHitPos))
 					{
 						// Adjust shadow factor based on transparency
-						shadowFactor *= rayObject->mTransparency;
+						shadowFactor *= rayObject->GetTransparency();
 
 						// If fully opaque, break out of the loop
 						if (shadowFactor <= 0.0f)
@@ -89,17 +89,17 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 	{
 		// Add ambient occlusion
 		float ao = ComputeAO(currentHitPos, currentRayObject->NormalAtPosition(currentHitPos));
-		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo * (1.0f - mAOStrength + ao * mAOStrength); // Linear interpolation between AO strength and AO
+		finalPixelCol += mAmbientColour * currentRayObject->GetAlbedo() * (1.0f - mAOStrength + ao * mAOStrength); // Linear interpolation between AO strength and AO
 	}
 	else
 	{
 		// Add ambient light
-		finalPixelCol += mAmbientColour * currentRayObject->mAlbedo;
+		finalPixelCol += mAmbientColour * currentRayObject->GetAlbedo();
 	}
 
 	// Reflections
 	// Check if the depth we're at exceeds the max depth, and that the reflectivity is enough to make a difference
-	if (_depth < mMaxDepth && currentRayObject->mReflectivity > 0.01f)
+	if (_depth < mMaxDepth && currentRayObject->GetReflectivity() > 0.01f)
 	{
 		// Calculate direction to reflect
 		glm::vec3 reflectionDir = glm::reflect(_ray.direction,currentRayObject->NormalAtPosition(currentHitPos));
@@ -108,21 +108,21 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		// Trace the reflected ray to get the colour (recursion), add 1 to the depth
 		glm::vec3 reflectionColor = TraceRay(reflectionRay, _camPos, _depth + 1);
 		// Add reflection colour multiplied by reflectivity value of the object
-		finalPixelCol = glm::mix(finalPixelCol, reflectionColor, currentRayObject->mReflectivity);
+		finalPixelCol = glm::mix(finalPixelCol, reflectionColor, currentRayObject->GetReflectivity());
 	}
 
 	// Transparency / refraction
 	// (transparency linked with refractions as a non refractive transparent object just refracts the rays to the same direction as they already were)
-	if (_depth < mMaxDepth && currentRayObject->mTransparency > 0.01f)
+	if (_depth < mMaxDepth && currentRayObject->GetTransparency() > 0.01f)
 	{
 		// Calculate refraction direction (refract takes incident direction, normal, and ratio of RI coming from and going in to (we just assume 1 which is RI of air))
-		glm::vec3 refractionDir = glm::refract(_ray.direction, currentRayObject->NormalAtPosition(currentHitPos), 1.0f / currentRayObject->mRefractiveIndex);
+		glm::vec3 refractionDir = glm::refract(_ray.direction, currentRayObject->NormalAtPosition(currentHitPos), 1.0f / currentRayObject->GetRefractiveIndex());
 		// Create refraction ray
 		Ray refractionRay(currentHitPos - currentRayObject->NormalAtPosition(currentHitPos) * 0.01f, refractionDir);
 		// Trace the refracted ray to get the colour (recursion), add 1 to the depth
 		glm::vec3 refractionColor = TraceRay(refractionRay, _camPos, _depth + 1);
 		// Add refraction colour multiplied by transparency value of the object
-		finalPixelCol = glm::mix(finalPixelCol, refractionColor, currentRayObject->mTransparency);
+		finalPixelCol = glm::mix(finalPixelCol, refractionColor, currentRayObject->GetTransparency());
 	}
 
 	return finalPixelCol;
@@ -183,7 +183,7 @@ float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal)
 		for (auto rayObject : rayObjects)
 		{
 			// Skip light objects
-			if (rayObject->mIsLight)
+			if (rayObject->IsLight())
 				continue;
 
 			glm::vec3 hitPos;

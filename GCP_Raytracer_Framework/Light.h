@@ -11,15 +11,19 @@ struct Light
 {
 	Light(std::string _name, glm::vec3 _position, glm::vec3 _colour) : mName(_name), position(_position), colour(_colour) {}
 
-	std::string mName = "Light";
-	glm::vec3 position{ 0 };
-	glm::vec3 colour{ 0 };
+	glm::vec3 GetPosition() { return position; }
+	glm::vec3 GetColour() { return colour; }
 
 	void UpdateUI()
 	{
-		ImGui::Text(mName.c_str()); 
-	
+		ImGui::Text(mName.c_str());
+
 		ImGui::SliderFloat3(("Position " + mName).c_str(), &position[0], -100.0f, 100.0f);
 		ImGui::ColorEdit3(("Colour " + mName).c_str(), &colour[0]);
 	}
+
+private:
+	std::string mName = "Light";
+	glm::vec3 position{ 0 };
+	glm::vec3 colour{ 0 };
 };
