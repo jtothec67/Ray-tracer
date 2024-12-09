@@ -55,7 +55,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 
 				glm::vec3 hitPos;
 				// Offset from surface to avoid self-shadowing
-				glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.01f);
+				glm::vec3 shadowRayFrom = currentHitPos + (currentRayObject->NormalAtPosition(currentHitPos) * 0.001f);
 
 				// If ray hits, check it's between hit position and the light
 				if (rayObject->RayIntersect(Ray(shadowRayFrom, glm::normalize(light->GetPosition() - currentHitPos)), hitPos))
@@ -104,7 +104,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		// Calculate direction to reflect
 		glm::vec3 reflectionDir = glm::reflect(_ray.direction,currentRayObject->NormalAtPosition(currentHitPos));
 		// Create reflection ray
-		Ray reflectionRay(currentHitPos + currentRayObject->NormalAtPosition(currentHitPos) * 0.01f, reflectionDir);
+		Ray reflectionRay(currentHitPos + currentRayObject->NormalAtPosition(currentHitPos) * 0.001f, reflectionDir);
 		// Trace the reflected ray to get the colour (recursion), add 1 to the depth
 		glm::vec3 reflectionColor = TraceRay(reflectionRay, _camPos, _depth + 1);
 		// Add reflection colour multiplied by reflectivity value of the object
@@ -118,7 +118,7 @@ glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 		// Calculate refraction direction (refract takes incident direction, normal, and ratio of RI coming from and going in to (we just assume 1 which is RI of air))
 		glm::vec3 refractionDir = glm::refract(_ray.direction, currentRayObject->NormalAtPosition(currentHitPos), 1.0f / currentRayObject->GetRefractiveIndex());
 		// Create refraction ray
-		Ray refractionRay(currentHitPos - currentRayObject->NormalAtPosition(currentHitPos) * 0.01f, refractionDir);
+		Ray refractionRay(currentHitPos - currentRayObject->NormalAtPosition(currentHitPos) * 0.001f, refractionDir);
 		// Trace the refracted ray to get the colour (recursion), add 1 to the depth
 		glm::vec3 refractionColor = TraceRay(refractionRay, _camPos, _depth + 1);
 		// Add refraction colour multiplied by transparency value of the object
@@ -157,7 +157,7 @@ void RayTracer::GenerateHemisphereSamples(int _numSamples)
 	}
 }
 
-void RayTracer::SetNumSamples(int _numSamples)
+void RayTracer::SetNumAOSamples(int _numSamples)
 {
 	if (mNumAOSamples == _numSamples)
 		return; // Don't recalculate samples if nothing changed
@@ -177,7 +177,7 @@ float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal)
 		// If our sample is beyond 90 degrees from the normal, flip it
 		glm::vec3 orientedSampleDir = glm::dot(sampleDir, _normal) > 0 ? sampleDir : -sampleDir;
 		// Create a ray from the intersect position (offset slightly to avoid intersecting with itself) with the samples direction
-		Ray sampleRay(_intersectPosition + _normal * 0.01f, orientedSampleDir);
+		Ray sampleRay(_intersectPosition + _normal * 0.001f, orientedSampleDir);
 
 		// Check if the ray hits anything
 		for (auto rayObject : rayObjects)

@@ -14,7 +14,7 @@ public:
 	glm::vec3 TraceRay(Ray _ray, glm::vec3 _camPos, int _depth);
 
 	void GenerateHemisphereSamples(int _numSamples);
-	void SetNumSamples(int _numSamples);
+	void SetNumAOSamples(int _numSamples);
 	float ComputeAO(glm::vec3 _position, glm::vec3 _normal);
 
 	void SetBackgroundColour(glm::vec3 _colour) { mBackgroundColour = _colour; }
@@ -23,7 +23,6 @@ public:
 	void SetAmbientOcclusion(bool _ao) { mAmbientOcclusion = _ao; }
 	void SetAOStrength(float _strength) { mAOStrength = _strength; }
 	void SetAORadius(float _radius) { mAORadius = _radius; }
-	void SetNumAOSamples(int _numSamples) { mNumAOSamples = _numSamples; }
 	void SetShadows(bool _shadows) { mShadows = _shadows; }
 	void SetMaxDepth(int _depth) { mMaxDepth = _depth; }
 

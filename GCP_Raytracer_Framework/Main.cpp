@@ -15,8 +15,11 @@
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
 
+#include <fstream>
 #include <vector>
 #include <thread>
+
+void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
 
 void InitialiseScene1(RayTracer& _rayTracer);
 void InitialiseScene2(RayTracer& _rayTracer);
@@ -38,7 +41,6 @@ void TracePixels(int _fromy, int _toy, glm::ivec2 _winSize, Camera* _camera, Ray
 
 void RayTraceParallel(ThreadPool& threadPool, int _numTasks, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
-	//std::vector<std::thread> threads;
 	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numTasks));
 
 	for (int i = 0; i < _numTasks; ++i)
@@ -47,13 +49,7 @@ void RayTraceParallel(ThreadPool& threadPool, int _numTasks, glm::ivec2 _winSize
 		int endY = std::min(startY + rowsPerThread, _winSize.y);
 
 		threadPool.EnqueueTask([=] { TracePixels(startY, endY - 1, _winSize, _camera, _rayTracer, _myFramework); });
-
 	}
-
-	/*for (auto& thread : threads)
-	{
-		thread.join();
-	}*/
 
 	threadPool.WaitForCompletion();
 }
@@ -232,6 +228,11 @@ int main(int argc, char* argv[])
 				InitialiseScene2(rayTracer);
 			}
 
+			if (ImGui::Button("Test 1"))
+			{
+				Test1(winSize, camera, rayTracer, _myFramework, threadPool);
+			}
+
 			int tasks = numTasks;
 			ImGui::SliderInt("Number of tasks", &tasks, 0, 128);
 			numTasks = tasks;
@@ -309,7 +310,6 @@ int main(int argc, char* argv[])
 
 		fps = 1000 / timer.GetElapsedMilliseconds();
 		timer.Stop();
-
 		if (averageFrameTimer.GetElapsedMilliseconds() > 1000)
 		{
 			std::cout << "Average FPS: " << frames << std::endl;
@@ -329,6 +329,41 @@ int main(int argc, char* argv[])
 	ImGui::DestroyContext();
 
 	return 0;
+}
+
+void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
+{
+	std::ofstream csvFile("frame_times.csv");
+	csvFile << "Threads,AverageFrameTime\n";
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
+
+	InitialiseScene1(_rayTracer);
+
+	for (int numThreads = 1; numThreads <= 128; ++numThreads)
+	{
+		std::cout << "Testing " << numThreads << " threads" << std::endl;
+		int numTasks = numThreads;
+		_threadPool.Shutdown();
+		_threadPool.InitialiseThreads(numThreads);
+
+		float totalFrameTime = 0.0f;
+		for (int frame = 0; frame < 10; ++frame)
+		{
+			_myFramework.ClearWindow();
+			Timer timer;
+			RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
+			totalFrameTime += timer.GetElapsedMilliseconds();
+			timer.Stop();
+			_myFramework.DrawScreenTexture();
+		}
+
+		float averageFrameTime = totalFrameTime / 10.0f;
+		csvFile << numThreads << "," << averageFrameTime << "\n";
+	}
+
+	csvFile.close();
 }
 
 void InitialiseScene1(RayTracer& _rayTracer)
@@ -398,7 +433,7 @@ void InitialiseScene2(RayTracer& _rayTracer)
 	float sphereSpacingY = 1.6f;
 	float sphereShininess = 0.0f;
 	int gridSize = 7; // 7x7 grid of spheres
-	int offSet = -3;
+	float offSet = -3.5f;
 
 	for (int x = 0 + offSet; x < gridSize + offSet; ++x)
 	{
