@@ -20,6 +20,7 @@
 #include <thread>
 
 void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
+void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
 
 void InitialiseScene1(RayTracer& _rayTracer);
 void InitialiseScene2(RayTracer& _rayTracer);
@@ -233,6 +234,11 @@ int main(int argc, char* argv[])
 				Test1(winSize, camera, rayTracer, _myFramework, threadPool);
 			}
 
+			if (ImGui::Button("Test 2"))
+			{
+				Test2(winSize, camera, rayTracer, _myFramework, threadPool);
+			}
+
 			int tasks = numTasks;
 			ImGui::SliderInt("Number of tasks", &tasks, 0, 128);
 			numTasks = tasks;
@@ -333,7 +339,7 @@ int main(int argc, char* argv[])
 
 void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
 {
-	std::ofstream csvFile("frame_times.csv");
+	std::ofstream csvFile("test_1_results.csv");
 	csvFile << "Threads,AverageFrameTime\n";
 
 	_camera.SetPosition(glm::vec3(0, 0, 0));
@@ -341,7 +347,7 @@ void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 
 	InitialiseScene1(_rayTracer);
 
-	for (int numThreads = 1; numThreads <= 128; ++numThreads)
+	for (int numThreads = 1; numThreads <= 250; ++numThreads)
 	{
 		std::cout << "Testing " << numThreads << " threads" << std::endl;
 		int numTasks = numThreads;
@@ -361,6 +367,49 @@ void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 
 		float averageFrameTime = totalFrameTime / 10.0f;
 		csvFile << numThreads << "," << averageFrameTime << "\n";
+	}
+
+	csvFile.close();
+}
+
+void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
+{
+	std::ofstream csvFile("test_2_results.csv");
+	csvFile << "Tasks,16 thread,32 threads,64 threads,128 threads\n";
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
+
+	InitialiseScene1(_rayTracer);
+
+	std::vector<int> threadCounts = { 16, 32, 64, 128 };
+
+	for (int numTasks = 1; numTasks <= 128; ++numTasks)
+	{
+		csvFile << numTasks;
+
+		for (int numThreads : threadCounts)
+		{
+			std::cout << "Testing " << numTasks << " tasks with " << numThreads << " threads" << std::endl;
+			_threadPool.Shutdown();
+			_threadPool.InitialiseThreads(numThreads);
+
+			float totalFrameTime = 0.0f;
+			for (int frame = 0; frame < 10; ++frame)
+			{
+				_myFramework.ClearWindow();
+				Timer timer;
+				RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
+				totalFrameTime += timer.GetElapsedMilliseconds();
+				timer.Stop();
+				_myFramework.DrawScreenTexture();
+			}
+
+			float averageFrameTime = totalFrameTime / 10.0f;
+			csvFile << "," << averageFrameTime;
+		}
+
+		csvFile << "\n";
 	}
 
 	csvFile.close();
