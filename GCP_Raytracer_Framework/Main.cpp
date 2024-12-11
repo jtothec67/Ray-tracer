@@ -21,6 +21,7 @@
 
 void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
 void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
+void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
 
 void InitialiseScene1(RayTracer& _rayTracer);
 void InitialiseScene2(RayTracer& _rayTracer);
@@ -219,13 +220,11 @@ int main(int argc, char* argv[])
 
 			if (ImGui::Button("Scene 1"))
 			{
-				rayTracer.ClearScene();
 				InitialiseScene1(rayTracer);
 			}
 
 			if (ImGui::Button("Scene 2"))
 			{
-				rayTracer.ClearScene();
 				InitialiseScene2(rayTracer);
 			}
 
@@ -237,6 +236,11 @@ int main(int argc, char* argv[])
 			if (ImGui::Button("Test 2"))
 			{
 				Test2(winSize, camera, rayTracer, _myFramework, threadPool);
+			}
+
+			if (ImGui::Button("Test 3"))
+			{
+				Test3(winSize, camera, rayTracer, _myFramework, threadPool);
 			}
 
 			int tasks = numTasks;
@@ -347,7 +351,7 @@ void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 
 	InitialiseScene1(_rayTracer);
 
-	for (int numThreads = 1; numThreads <= 250; ++numThreads)
+	for (int numThreads = 1; numThreads <= 500; ++numThreads)
 	{
 		std::cout << "Testing " << numThreads << " threads" << std::endl;
 		int numTasks = numThreads;
@@ -363,6 +367,7 @@ void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 			totalFrameTime += timer.GetElapsedMilliseconds();
 			timer.Stop();
 			_myFramework.DrawScreenTexture();
+			_myFramework.SwapWindow();
 		}
 
 		float averageFrameTime = totalFrameTime / 10.0f;
@@ -375,16 +380,16 @@ void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
 {
 	std::ofstream csvFile("test_2_results.csv");
-	csvFile << "Tasks,16 thread,32 threads,64 threads,128 threads\n";
+	csvFile << "Tasks,8 threads,16 thread,32 threads,64 threads,128 threads,256 threads\n";
 
 	_camera.SetPosition(glm::vec3(0, 0, 0));
 	_camera.SetRotation(glm::vec3(0, 0, 0));
 
 	InitialiseScene1(_rayTracer);
 
-	std::vector<int> threadCounts = { 16, 32, 64, 128 };
+	std::vector<int> threadCounts = { 8, 16, 32, 64, 128, 256 };
 
-	for (int numTasks = 1; numTasks <= 128; ++numTasks)
+	for (int numTasks = 1; numTasks <= 256; ++numTasks)
 	{
 		csvFile << numTasks;
 
@@ -403,6 +408,7 @@ void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 				totalFrameTime += timer.GetElapsedMilliseconds();
 				timer.Stop();
 				_myFramework.DrawScreenTexture();
+				_myFramework.SwapWindow();
 			}
 
 			float averageFrameTime = totalFrameTime / 10.0f;
@@ -415,8 +421,52 @@ void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	csvFile.close();
 }
 
+void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
+{
+	std::ofstream csvFile("test_3_results.csv");
+	csvFile << "AOSamples,AverageFrameTime\n";
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
+
+	InitialiseScene2(_rayTracer);
+
+	_rayTracer.SetAmbientOcclusion(true);
+	_rayTracer.SetAOStrength(2);
+
+	int numThreads = 24;
+	int numTasks = 24;
+	_threadPool.Shutdown();
+	_threadPool.InitialiseThreads(numThreads);
+
+	for (int numSamples = 1; numSamples <= 256; ++numSamples)
+	{
+		std::cout << "Testing " << numSamples << " AO samples" << std::endl;
+		_rayTracer.SetNumAOSamples(numSamples);
+
+		float totalFrameTime = 0.0f;
+		for (int frame = 0; frame < 10; ++frame)
+		{
+			_myFramework.ClearWindow();
+			Timer timer;
+			RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
+			totalFrameTime += timer.GetElapsedMilliseconds();
+			timer.Stop();
+			_myFramework.DrawScreenTexture();
+			_myFramework.SwapWindow();
+		}
+
+		float averageFrameTime = totalFrameTime / 10.0f;
+		csvFile << numSamples << "," << averageFrameTime << "\n";
+	}
+
+	csvFile.close();
+}
+
 void InitialiseScene1(RayTracer& _rayTracer)
 {
+	_rayTracer.ClearScene();
+
 	_rayTracer.SetAORadius(5.f);
 
 	glm::vec3 lightPos1 = glm::vec3(-40, 0, -50);
@@ -474,6 +524,8 @@ void InitialiseScene1(RayTracer& _rayTracer)
 
 void InitialiseScene2(RayTracer& _rayTracer)
 {
+	_rayTracer.ClearScene();
+
 	_rayTracer.SetAORadius(1.1f);
 
 	glm::vec3 sphereColor = glm::vec3(1, 1, 1);
