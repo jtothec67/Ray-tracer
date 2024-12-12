@@ -20,6 +20,7 @@ public:
 	void SetBackgroundColour(glm::vec3 _colour) { mBackgroundColour = _colour; }
 	void SetAmbientColour(glm::vec3 _colour) { mAmbientColour = _colour; }
 	void SetPBR(bool _pbr) { mPBR = _pbr; }
+	void SetOptimisedAO(bool _optimisedAO);
 	void SetAmbientOcclusion(bool _ao) { mAmbientOcclusion = _ao; }
 	void SetAOStrength(float _strength) { mAOStrength = _strength; }
 	void SetAORadius(float _radius) { mAORadius = _radius; }
@@ -29,6 +30,7 @@ public:
 	bool GetPBR() { return mPBR; }
 	bool GetShadows() { return mShadows; }
 	bool GetAmbientOcclusion() { return mAmbientOcclusion; }
+	bool GetOptimisedAO() { return mOptimisedAO; }
 	glm::vec3 GetAmbientColour() { return mAmbientColour; }
 	float GetAOStrength() { return mAOStrength; }
 	float GetAORadius() { return mAORadius; }
@@ -53,6 +55,8 @@ private:
 
 	bool mPBR = true;
 
+	bool mOptimisedAO = true;
+
 	bool mAmbientOcclusion = false;
 	float mAOStrength = 1.f;
 	float mAORadius = 5.f;
@@ -61,6 +65,9 @@ private:
 	bool mShadows = true;
 
 	int mMaxDepth = 2;
+
+	std::vector<glm::vec3> mInitialCheckHemisphereSamples;
+	std::vector<glm::vec3> mRestOfHemisphereSamples;
 
 	std::vector<glm::vec3> mHemisphereSamples;
 
