@@ -25,6 +25,7 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 
 void InitialiseScene1(RayTracer& _rayTracer);
 void InitialiseScene2(RayTracer& _rayTracer);
+void InitialiseScene3(RayTracer& _rayTracer);
 
 void TracePixels(int _fromy, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
@@ -226,6 +227,11 @@ int main(int argc, char* argv[])
 			if (ImGui::Button("Scene 2"))
 			{
 				InitialiseScene2(rayTracer);
+			}
+
+			if (ImGui::Button("Scene 3"))
+			{
+				InitialiseScene3(rayTracer);
 			}
 
 			if (ImGui::Button("Test 1"))
@@ -587,4 +593,47 @@ void InitialiseScene2(RayTracer& _rayTracer)
 	Sphere* lightSphere = new Sphere("LightSphere", lightPosition, 2, glm::vec3(1, 1, 1));
 	lightSphere->IsLight(true);
 	RayObject* rayLightSphere = (RayObject*)lightSphere;
+}
+
+void InitialiseScene3(RayTracer& _rayTracer)
+{
+	_rayTracer.ClearScene();
+
+	glm::vec3 lightPos1 = glm::vec3(-45, 10, -35);
+	Light* light1 = new Light("Light 1", lightPos1, glm::vec3(1, 1, 1));
+	_rayTracer.AddLight(light1);
+	Sphere* lightSphere1 = new Sphere("Light1", lightPos1, 2, glm::vec3(1, 1, 1));
+	RayObject* rayLightSphere1 = (RayObject*)lightSphere1;
+	rayLightSphere1->IsLight(true);
+	_rayTracer.AddRayObject(rayLightSphere1);
+
+	glm::vec3 lightPos2 = glm::vec3(45, 10, 0);
+	Light* light2 = new Light("Light 2", lightPos2, glm::vec3(1, 1, 1));
+	_rayTracer.AddLight(light2);
+	Sphere* lightSphere2 = new Sphere("Light2", lightPos2, 2, glm::vec3(1, 1, 1));
+	RayObject* rayLightSphere2 = (RayObject*)lightSphere2;
+	rayLightSphere2->IsLight(true);
+	_rayTracer.AddRayObject(rayLightSphere2);
+
+	Sphere* sphere1 = new Sphere("Sphere1", glm::vec3(20, 0, -60), 10, glm::vec3(1, 0, 0));
+	sphere1->SetRoughness(1);
+	sphere1->SetReflectivity(1);
+	RayObject* raySphere1 = (RayObject*)sphere1;
+	_rayTracer.AddRayObject(raySphere1);
+
+	Sphere* sphere2 = new Sphere("Sphere2", glm::vec3(-20, 0, -60), 10, glm::vec3(1, 0, 0));
+	sphere2->SetRoughness(0.15);
+	RayObject* raySphere2 = (RayObject*)sphere2;
+	_rayTracer.AddRayObject(raySphere2);
+
+	Plane* plane1 = new Plane("Plane1", glm::vec3(0, -10, 0), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
+	plane1->SetShininess(0);
+	RayObject* rayPlane1 = (RayObject*)plane1;
+	_rayTracer.AddRayObject(rayPlane1);
+
+	Plane* plane2 = new Plane("Plane2", glm::vec3(0, 0, -70), glm::vec3(0, 0, 1), glm::vec3(1, 1, 1));
+	plane2->SetShininess(0);
+	plane2->SetRoughness(1);
+	RayObject* rayPlane2 = (RayObject*)plane2;
+	_rayTracer.AddRayObject(rayPlane2);
 }

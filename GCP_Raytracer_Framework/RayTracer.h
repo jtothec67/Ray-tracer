@@ -49,7 +49,7 @@ public:
 	void ClearScene() { rayObjects.clear(); mLights.clear(); }
 
 private:
-	glm::vec3 mBackgroundColour{ 0, 0, 0.2f };
+	glm::vec3 mBackgroundColour{ 0.2f, 0.2f, 0.2f };
 
 	glm::vec3 mAmbientColour{ 0.08f, 0.08f, 0.08f };
 
