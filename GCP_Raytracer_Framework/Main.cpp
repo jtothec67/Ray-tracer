@@ -427,7 +427,7 @@ void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 
 void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
 {
-	std::ofstream csvFile("test_3_results.csv");
+	std::ofstream csvFile("test_3 _pt2_results.csv");
 	csvFile << "AOSamples,Optimised,Unoptimised\n";
 
 	_camera.SetPosition(glm::vec3(0, 0, 0));
@@ -443,7 +443,7 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	_threadPool.Shutdown();
 	_threadPool.InitialiseThreads(numThreads);
 
-	for (int numSamples = 1; numSamples <= 256; ++numSamples)
+	for (int numSamples = 1; numSamples <= 128; ++numSamples)
 	{
 		std::cout << "Testing optimised AO with " << numSamples << " samples" << std::endl;
 		_rayTracer.SetNumAOSamples(numSamples);
