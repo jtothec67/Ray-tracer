@@ -449,7 +449,7 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	_threadPool.Shutdown();
 	_threadPool.InitialiseThreads(numThreads);
 
-	for (int numSamples = 1; numSamples <= 6; ++numSamples)
+	for (int numSamples = 1; numSamples <= 128; ++numSamples)
 	{
 		std::cout << "Testing AO with " << numSamples << " samples" << std::endl;
 		_rayTracer.SetNumAOSamples(numSamples);
