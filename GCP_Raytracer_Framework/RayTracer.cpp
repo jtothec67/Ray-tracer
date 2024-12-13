@@ -138,53 +138,20 @@ void RayTracer::SetNumAOSamples(int _numSamples)
 	GenerateHemisphereSamples(mNumAOSamples);
 }
 
-void RayTracer::SetOptimisedAO(bool _optimisedAO)
+void RayTracer::SetAOSplits(int _numSplits)
 {
-	if (mOptimisedAO == _optimisedAO)
+	if (mAOSplits == _numSplits)
 		return;
 
-	mOptimisedAO = _optimisedAO;
+	mAOSplits = _numSplits;
 	GenerateHemisphereSamples(mNumAOSamples);
 }
 
 void RayTracer::GenerateHemisphereSamples(int _numSamples)
 {
-	if (!mOptimisedAO)
-	{
-		// Clear old samples and reserve space for new ones (for efficiency)
-		mHemisphereSamples.clear();
-		mHemisphereSamples.reserve(_numSamples);
-
-		// Generates direction vectors evenly distributed on a hemisphere
-		for (int i = 0; i < _numSamples; ++i)
-		{
-			float u = static_cast<float>(i) / _numSamples;
-			float v = 0;
-			float p = 0.5f;
-			for (int j = i; j > 0; p *= 0.5f, j >>= 1)
-			{
-				if (j & 1)
-					v += p;
-			}
-
-			float theta = 2 * 3.1415f * v;
-			float phi = acos(1 - 2 * u);
-
-			float x = sin(phi) * cos(theta);
-			float y = sin(phi) * sin(theta);
-			float z = cos(phi);
-
-			mHemisphereSamples.emplace_back(x, y, z);
-		}
-
-		return;
-	}
-
-	mInitialCheckHemisphereSamples.clear();
-	mInitialCheckHemisphereSamples.reserve(_numSamples/2);
-
-	mRestOfHemisphereSamples.clear();
-	mRestOfHemisphereSamples.reserve(_numSamples/2);
+	// Clear old samples and reserve space for new ones
+	mSplitHemisphereSamples.clear();
+	mSplitHemisphereSamples.resize(mAOSplits);
 
 	for (int i = 0; i < _numSamples; ++i)
 	{
@@ -204,26 +171,22 @@ void RayTracer::GenerateHemisphereSamples(int _numSamples)
 		float y = sin(phi) * sin(theta);
 		float z = cos(phi);
 
-		if (i % 2 == 0)
-		{
-			mInitialCheckHemisphereSamples.emplace_back(x, y, z);
-		}
-		else
-		{
-			mRestOfHemisphereSamples.emplace_back(x, y, z);
-		}
+		mSplitHemisphereSamples[i % mAOSplits].emplace_back(x, y, z);
 	}
 }
 
 float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal)
 {
-	if (!mOptimisedAO)
-	{
-		int occlusionCount = 0;
+	int occlusionCount = 0;
+	int totalSamplesChecked = 0;
 
-		// Check if each sample hits anything
-		for (auto& sampleDir : mHemisphereSamples)
+	// Check if each sample hits anything in each split vector
+	for (auto& sampleVector : mSplitHemisphereSamples)
+	{
+		bool hit = false;
+		for (auto& sampleDir : sampleVector)
 		{
+			totalSamplesChecked++;
 			// If our sample is beyond 90 degrees from the normal, flip it
 			glm::vec3 orientedSampleDir = glm::dot(sampleDir, _normal) > 0 ? sampleDir : -sampleDir;
 			// Create a ray from the intersect position (offset slightly to avoid intersecting with itself) with the samples direction
@@ -245,80 +208,16 @@ float RayTracer::ComputeAO(glm::vec3 _intersectPosition, glm::vec3 _normal)
 					{
 						// Increase occlusion count
 						occlusionCount++;
+						hit = true;
 						// Don't need to check more objects so break out of object loop
 						break;
 					}
 				}
 			}
 		}
-
-		// Return the occlusion strength based on occlusionCount. 0 is fully occluded (no ambient light can reach it), 1 is no occlusion (all ambient light reaches it)
-		return 1.0f - (static_cast<float>(occlusionCount) / mNumAOSamples);
+		if (!hit)
+			return 1.0f - (static_cast<float>(occlusionCount) / totalSamplesChecked);
 	}
 
-	int occlusionCount = 0;
-
-	// Check if each sample hits anything
-	for (auto& sampleDir : mInitialCheckHemisphereSamples)
-	{
-		// If our sample is beyond 90 degrees from the normal, flip it
-		glm::vec3 orientedSampleDir = glm::dot(sampleDir, _normal) > 0 ? sampleDir : -sampleDir;
-		// Create a ray from the intersect position (offset slightly to avoid intersecting with itself) with the samples direction
-		Ray sampleRay(_intersectPosition + _normal * 0.001f, orientedSampleDir);
-		// Check if the ray hits anything
-		for (auto rayObject : rayObjects)
-		{
-			// Skip light objects
-			if (rayObject->IsLight())
-				continue;
-			glm::vec3 hitPos;
-			// If it hits
-			if (rayObject->RayIntersect(sampleRay, hitPos))
-			{
-				//Check if hit is in the AO radius specified
-				if (glm::length(hitPos - _intersectPosition) < mAORadius)
-				{
-					// Increase occlusion count
-					occlusionCount++;
-					// Don't need to check more objects so break out of object loop
-					break;
-				}
-			}
-		}
-	}
-
-	// Initial checks haven't hit anything so don't both with rest of checks
-	if (occlusionCount == 0)
-		return 1;
-
-	// Check if each sample hits anything
-	for (auto& sampleDir : mRestOfHemisphereSamples)
-	{
-		// If our sample is beyond 90 degrees from the normal, flip it
-		glm::vec3 orientedSampleDir = glm::dot(sampleDir, _normal) > 0 ? sampleDir : -sampleDir;
-		// Create a ray from the intersect position (offset slightly to avoid intersecting with itself) with the samples direction
-		Ray sampleRay(_intersectPosition + _normal * 0.001f, orientedSampleDir);
-		// Check if the ray hits anything
-		for (auto rayObject : rayObjects)
-		{
-			// Skip light objects
-			if (rayObject->IsLight())
-				continue;
-			glm::vec3 hitPos;
-			// If it hits
-			if (rayObject->RayIntersect(sampleRay, hitPos))
-			{
-				//Check if hit is in the AO radius specified
-				if (glm::length(hitPos - _intersectPosition) < mAORadius)
-				{
-					// Increase occlusion count
-					occlusionCount++;
-					// Don't need to check more objects so break out of object loop
-					break;
-				}
-			}
-		}
-	}
-
-	return 1.0f - (static_cast<float>(occlusionCount) / mNumAOSamples);
+	return 1.0f - (static_cast<float>(occlusionCount) / totalSamplesChecked);
 }

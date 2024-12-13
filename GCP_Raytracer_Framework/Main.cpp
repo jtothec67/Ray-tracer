@@ -274,9 +274,9 @@ int main(int argc, char* argv[])
 			ImGui::Checkbox("Ambient Occlusion", &ambientOcclusion);
 			rayTracer.SetAmbientOcclusion(ambientOcclusion);
 
-			bool optimisedAO = rayTracer.GetOptimisedAO();
-			ImGui::Checkbox("Optimised AO", &optimisedAO);
-			rayTracer.SetOptimisedAO(optimisedAO);
+			int numSplits = rayTracer.GetAOSplits();
+			ImGui::SliderInt("AO Splits", &numSplits, 1, 16);
+			rayTracer.SetAOSplits(numSplits);
 
 			glm::vec3 ambientColour = rayTracer.GetAmbientColour();
 			ImGui::ColorEdit3("Ambient Colour", &ambientColour[0]);
@@ -433,8 +433,8 @@ void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 
 void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
 {
-	std::ofstream csvFile("test_3 _pt2_results.csv");
-	csvFile << "AOSamples,Optimised,Unoptimised\n";
+	std::ofstream csvFile("test_3_results.csv");
+	csvFile << "AOSamples,1 splits,2 splits,3 splits,4 splits,5 splits,6 splits\n";
 
 	_camera.SetPosition(glm::vec3(0, 0, 0));
 	_camera.SetRotation(glm::vec3(0, 0, 0));
@@ -449,44 +449,36 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	_threadPool.Shutdown();
 	_threadPool.InitialiseThreads(numThreads);
 
-	for (int numSamples = 1; numSamples <= 128; ++numSamples)
+	for (int numSamples = 1; numSamples <= 6; ++numSamples)
 	{
-		std::cout << "Testing optimised AO with " << numSamples << " samples" << std::endl;
+		std::cout << "Testing AO with " << numSamples << " samples" << std::endl;
 		_rayTracer.SetNumAOSamples(numSamples);
 
-		// Test with optimized AO
-		_rayTracer.SetOptimisedAO(true);
-		float totalFrameTimeOptimised = 0.0f;
-		for (int frame = 0; frame < 10; ++frame)
-		{
-			_myFramework.ClearWindow();
-			Timer timer;
-			RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
-			totalFrameTimeOptimised += timer.GetElapsedMilliseconds();
-			timer.Stop();
-			_myFramework.DrawScreenTexture();
-			_myFramework.SwapWindow();
-		}
-		float averageFrameTimeOptimised = totalFrameTimeOptimised / 10.0f;
+		csvFile << numSamples;
 
-		std::cout << "Testing unoptimised AO with " << numSamples << " samples" << std::endl;
-		// Test with unoptimized AO
-		_rayTracer.SetOptimisedAO(false);
-		float totalFrameTimeUnoptimised = 0.0f;
-		for (int frame = 0; frame < 10; ++frame)
+		for (int numSplits = 1; numSplits <= 6; ++numSplits)
 		{
-			_myFramework.ClearWindow();
-			Timer timer;
-			RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
-			totalFrameTimeUnoptimised += timer.GetElapsedMilliseconds();
-			timer.Stop();
-			_myFramework.DrawScreenTexture();
-			_myFramework.SwapWindow();
-		}
-		float averageFrameTimeUnoptimised = totalFrameTimeUnoptimised / 10.0f;
+			std::cout << "Testing with " << numSplits << " splits" << std::endl;
+			_rayTracer.SetAOSplits(numSplits);
 
-		// Record results
-		csvFile << numSamples << "," << averageFrameTimeOptimised << "," << averageFrameTimeUnoptimised << "\n";
+			float totalFrameTime = 0.0f;
+			for (int frame = 0; frame < 10; ++frame)
+			{
+				_myFramework.ClearWindow();
+				Timer timer;
+				RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
+				totalFrameTime += timer.GetElapsedMilliseconds();
+				timer.Stop();
+				_myFramework.DrawScreenTexture();
+				_myFramework.SwapWindow();
+			}
+			float averageFrameTime = totalFrameTime / 10.0f;
+
+			// Record results
+			csvFile << "," << averageFrameTime;
+		}
+
+		csvFile << "\n";
 	}
 
 	csvFile.close();
