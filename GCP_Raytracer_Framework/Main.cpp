@@ -433,7 +433,7 @@ void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 
 void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
 {
-	std::ofstream csvFile("test_3_results.csv");
+	std::ofstream csvFile("test_3_scene2_results.csv");
 	csvFile << "AOSamples,1 splits,2 splits,3 splits,4 splits,5 splits,6 splits\n";
 
 	_camera.SetPosition(glm::vec3(0, 0, 0));
@@ -482,6 +482,57 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	}
 
 	csvFile.close();
+
+
+	std::ofstream csvFile2("test_3_scene1_results.csv");
+	csvFile2 << "AOSamples,1 splits,2 splits,3 splits\n";
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
+
+	InitialiseScene1(_rayTracer);
+
+	_rayTracer.SetAmbientOcclusion(true);
+	_rayTracer.SetAOStrength(2);
+
+	int numThreads2 = 24;
+	int numTasks2 = 24;
+	_threadPool.Shutdown();
+	_threadPool.InitialiseThreads(numThreads2);
+
+	for (int numSamples = 1; numSamples <= 128; ++numSamples)
+	{
+		std::cout << "Testing AO with " << numSamples << " samples" << std::endl;
+		_rayTracer.SetNumAOSamples(numSamples);
+
+		csvFile2 << numSamples;
+
+		for (int numSplits = 1; numSplits <= 3; ++numSplits)
+		{
+			std::cout << "Testing with " << numSplits << " splits" << std::endl;
+			_rayTracer.SetAOSplits(numSplits);
+
+			float totalFrameTime = 0.0f;
+			for (int frame = 0; frame < 10; ++frame)
+			{
+				_myFramework.ClearWindow();
+				Timer timer;
+				RayTraceParallel(_threadPool, numTasks2, _winSize, &_camera, &_rayTracer, &_myFramework);
+				totalFrameTime += timer.GetElapsedMilliseconds();
+				timer.Stop();
+				_myFramework.DrawScreenTexture();
+				_myFramework.SwapWindow();
+			}
+			float averageFrameTime = totalFrameTime / 10.0f;
+
+			// Record results
+			csvFile2 << "," << averageFrameTime;
+		}
+
+		csvFile2 << "\n";
+	}
+
+	csvFile2.close();
 }
 
 void InitialiseScene1(RayTracer& _rayTracer)
