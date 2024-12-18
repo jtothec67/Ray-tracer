@@ -2,7 +2,6 @@
 
 #include "RayTracer.h"
 #include "Camera.h"
-#include "RayObject.h"
 #include "Sphere.h"
 #include "Plane.h"
 #include "Cylinder.h"
@@ -23,38 +22,54 @@ void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
 void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool);
 
-void InitialiseScene1(RayTracer& _rayTracer);
-void InitialiseScene2(RayTracer& _rayTracer);
-void InitialiseScene3(RayTracer& _rayTracer);
+void InitialiseScene1(RayTracer& _rayTracer, Camera& _camera);
+void InitialiseScene2(RayTracer& _rayTracer, Camera& _camera);
+void InitialiseScene3(RayTracer& _rayTracer, Camera& _camera);
+void InitialiseScene4(RayTracer& _rayTracer, Camera& _camera);
 
 void TracePixels(int _fromy, int _toy, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
-	for (int y = _fromy; y <= _toy; ++y)
-	{
-		if (y >= _winSize.y) break;
-		for (int x = 0; x <= _winSize.x; ++x)
-		{
-			if (x >= _winSize.x) break;
-			Ray ray = _camera->GetRay(glm::ivec2(x, y), _winSize);
-			glm::vec3 colour = _rayTracer->TraceRay(ray, _camera->GetPosition(), 0);
-			_myFramework->DrawPixel(glm::ivec2(x, y), colour);
-		}
-	}
+    // Loop through each row of our assigned rows
+    for (int y = _fromy; y <= _toy; ++y)
+    {
+        // Break if y exceeds window height
+        if (y >= _winSize.y) break;
+
+        // Loop through each pixel in the current row
+        for (int x = 0; x <= _winSize.x; ++x)
+        {
+            // Break if x exceeds window width
+            if (x >= _winSize.x) break;
+
+            // Get the ray for the current pixel
+            Ray ray = _camera->GetRay(glm::ivec2(x, y), _winSize);
+
+            // Trace the ray to get the color at the current pixel
+            glm::vec3 colour = _rayTracer->TraceRay(ray, _camera->GetPosition(), 0);
+
+            // Draw the pixel with the traced color
+            _myFramework->DrawPixel(glm::ivec2(x, y), colour);
+        }
+    }
 }
 
 void RayTraceParallel(ThreadPool& threadPool, int _numTasks, glm::ivec2 _winSize, Camera* _camera, RayTracer* _rayTracer, GCP_Framework* _myFramework)
 {
-	int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numTasks));
+    // Calculate the number of rows each thread should process
+    int rowsPerThread = std::ceil(_winSize.y / static_cast<float>(_numTasks));
 
-	for (int i = 0; i < _numTasks; ++i)
-	{
-		int startY = i * rowsPerThread;
-		int endY = std::min(startY + rowsPerThread, _winSize.y);
+    // Enqueue tasks
+    for (int i = 0; i < _numTasks; ++i)
+    {
+        int startY = i * rowsPerThread; // Starting row for this task
+        int endY = std::min(startY + rowsPerThread, _winSize.y); // Ending row for this task
 
-		threadPool.EnqueueTask([=] { TracePixels(startY, endY - 1, _winSize, _camera, _rayTracer, _myFramework); });
-	}
+        // Enqueue the task to trace pixels for the assigned rows
+        threadPool.EnqueueTask([=] { TracePixels(startY, endY - 1, _winSize, _camera, _rayTracer, _myFramework); });
+    }
 
-	threadPool.WaitForCompletion();
+    // Wait for all tasks to complete
+    threadPool.WaitForCompletion();
 }
 
 int main(int argc, char* argv[])
@@ -71,6 +86,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	// Initialise camera and raytracer
 	glm::vec3 camPos = glm::vec3(0, 0, 0);
 	glm::vec3 camRot = glm::vec3(0, 0, 0);
 
@@ -78,7 +94,8 @@ int main(int argc, char* argv[])
 
 	RayTracer rayTracer;
 
-	InitialiseScene1(rayTracer);
+	// Set up the scene
+	InitialiseScene1(rayTracer, camera);
 
 	// Setting up the GUI system
 	IMGUI_CHECKVERSION();
@@ -93,8 +110,10 @@ int main(int argc, char* argv[])
 	ImGui_ImplSDL2_InitForOpenGL(_myFramework.GetWindow(), _myFramework.GetGLContext());
 	ImGui_ImplOpenGL3_Init(glslVersion);
 
+
 	SDL_Event e;
 
+	// Used to add up frames and display how many frames passed in last second
 	bool restartFrameTimer = true;
 	Timer averageFrameTimer;
 	int frames = 0;
@@ -107,17 +126,21 @@ int main(int argc, char* argv[])
 
 	int newBallCount = 0;
 
+	// Main loop
 	bool running = true;
 	while (running)
 	{
-		Timer timer;
+		// Used to calculate fps
+		Timer fpsTimer;
 
+		// Restarts average frame timer
 		if (restartFrameTimer)
 		{
 			averageFrameTimer.Start();
 			restartFrameTimer = false;
 		}
 
+		// Handle inputs
 		while (SDL_PollEvent(&e))
 		{
 			ImGui_ImplSDL2_ProcessEvent(&e);
@@ -130,6 +153,7 @@ int main(int argc, char* argv[])
 			{
 				switch (e.key.keysym.sym)
 				{
+					// Camera movement
 				case SDLK_w:
 					camera.SetPosition(camera.GetPosition() + camera.GetForward());
 					break;
@@ -162,6 +186,7 @@ int main(int argc, char* argv[])
 					break;
 				case SDLK_m:
 				{
+					// Add a new sphere
 					Sphere* sphere = new Sphere("New Sphere " + std::to_string(rayTracer.GetSizeOfRayObjects()), -camera.GetPosition(), 10, glm::vec3(1, 1, 1));
 					RayObject* raySphere = (RayObject*)sphere;
 					rayTracer.AddRayObject(raySphere);
@@ -169,6 +194,7 @@ int main(int argc, char* argv[])
 				}
 				case SDLK_p:
 				{
+					// Add a new plane
 					Plane* plane = new Plane("New Plane " + std::to_string(rayTracer.GetSizeOfRayObjects()), -camera.GetPosition(), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
 					RayObject* rayPlane = (RayObject*)plane;
 					rayTracer.AddRayObject(rayPlane);
@@ -176,6 +202,7 @@ int main(int argc, char* argv[])
 				}
 				case SDLK_l:
 				{
+					// Add a new light
 					Light* light = new Light("Light " + std::to_string(rayTracer.GetSizeOfLights()), - camera.GetPosition(), glm::vec3(1, 1, 1));
 					rayTracer.AddLight(light);
 
@@ -187,6 +214,7 @@ int main(int argc, char* argv[])
 				}
 				case SDLK_c:
 				{
+					// Add a new cylinder
 					Cylinder* cylinder = new Cylinder("New Cylinder " + std::to_string(rayTracer.GetSizeOfRayObjects()), -camera.GetPosition(), 10, 20, glm::vec3(1, 1, 1));
 					RayObject* rayCylinder = (RayObject*)cylinder;
 					rayTracer.AddRayObject(rayCylinder);
@@ -194,6 +222,7 @@ int main(int argc, char* argv[])
 				}
 				case SDLK_b:
 				{
+					// Add a new box
 					Box* box = new Box("New Box " + std::to_string(rayTracer.GetSizeOfRayObjects()), -camera.GetPosition(), glm::vec3(20, 20, 20), glm::vec3(1, 1, 1));
 					RayObject* rayBox = (RayObject*)box;
 					rayTracer.AddRayObject(rayBox);
@@ -203,12 +232,16 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		// Update the window size
 		_myFramework.UpdateWindow(winSize.x, winSize.y);
 
+		// Clear the window
 		_myFramework.ClearWindow();
 
+		// Renders the scene
 		RayTraceParallel(threadPool, numTasks, winSize, &camera, &rayTracer, &_myFramework);
 
+		// ImGui in {} purely so you can collapse in visual studio
 		{
 
 			ImGui_ImplOpenGL3_NewFrame();
@@ -219,20 +252,27 @@ int main(int argc, char* argv[])
 
 			ImGui::Text("FPS: %s", std::to_string(fps).c_str());
 
-			if (ImGui::Button("Scene 1"))
+			if (ImGui::Button("Base scene"))
 			{
-				InitialiseScene1(rayTracer);
+				InitialiseScene1(rayTracer, camera);
 			}
 
-			if (ImGui::Button("Scene 2"))
+			if (ImGui::Button("Ambient occlusion scene"))
 			{
-				InitialiseScene2(rayTracer);
+				InitialiseScene2(rayTracer, camera);
 			}
 
-			if (ImGui::Button("Scene 3"))
+			if (ImGui::Button("Sample scene"))
 			{
-				InitialiseScene3(rayTracer);
+				InitialiseScene3(rayTracer, camera);
 			}
+
+			if (ImGui::Button("Empty scene"))
+			{
+				InitialiseScene4(rayTracer, camera);
+			}
+
+			ImGui::Text("Tests");
 
 			if (ImGui::Button("Test 1"))
 			{
@@ -312,11 +352,14 @@ int main(int argc, char* argv[])
 
 		}
 
+		// Draws ray traced scene to screen
 		_myFramework.DrawScreenTexture();
 
+		// Draws the GUI
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		// Free floating ImGui window
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
@@ -326,12 +369,17 @@ int main(int argc, char* argv[])
 			SDL_GL_MakeCurrent(backup_current_window, baclup_current_context);
 		}
 
+		// Display the rendered scene
 		_myFramework.SwapWindow();
 
-		fps = 1000 / timer.GetElapsedMilliseconds();
-		timer.Stop();
+		// Calculate fps
+		fps = 1000 / fpsTimer.GetElapsedMilliseconds();
+		fpsTimer.Stop(); // Comment out this line to get fps output to console every frame
+
+		// If a second passed, output the average fps
 		if (averageFrameTimer.GetElapsedMilliseconds() > 1000)
 		{
+			// Not extremely accurate, but good enough to see averages at a glance
 			std::cout << "Average FPS: " << frames << std::endl;
 			averageFrameTimer.Stop();
 			restartFrameTimer = true;
@@ -353,37 +401,52 @@ int main(int argc, char* argv[])
 
 void Test1(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Framework& _myFramework, ThreadPool& _threadPool)
 {
+	// Open a file to write results to
 	std::ofstream csvFile("test_1_results.csv");
 	csvFile << "Threads,AverageFrameTime\n";
 
+	// Reset camera position and rotation
 	_camera.SetPosition(glm::vec3(0, 0, 0));
 	_camera.SetRotation(glm::vec3(0, 0, 0));
 
-	InitialiseScene1(_rayTracer);
+	// Initialise the scene
+	InitialiseScene1(_rayTracer, _camera);
 
+	// Test with different numbers of threads
 	for (int numThreads = 1; numThreads <= 500; ++numThreads)
 	{
+		// Output to console so we know we are making progress
 		std::cout << "Testing " << numThreads << " threads" << std::endl;
+
+		// Same number of tasks as threads
 		int numTasks = numThreads;
+
+		// Shutdown the thread pool and reinitialise with the new number of threads
 		_threadPool.Shutdown();
 		_threadPool.InitialiseThreads(numThreads);
 
+		// Render the scene 10 times and record the average frame time
 		float totalFrameTime = 0.0f;
 		for (int frame = 0; frame < 10; ++frame)
 		{
 			_myFramework.ClearWindow();
+
+			// Only time how long rendering takes
 			Timer timer;
 			RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
 			totalFrameTime += timer.GetElapsedMilliseconds();
 			timer.Stop();
+
 			_myFramework.DrawScreenTexture();
 			_myFramework.SwapWindow();
 		}
 
+		// Write to file
 		float averageFrameTime = totalFrameTime / 10.0f;
 		csvFile << numThreads << "," << averageFrameTime << "\n";
 	}
 
+	// Close the file
 	csvFile.close();
 }
 
@@ -395,7 +458,7 @@ void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	_camera.SetPosition(glm::vec3(0, 0, 0));
 	_camera.SetRotation(glm::vec3(0, 0, 0));
 
-	InitialiseScene1(_rayTracer);
+	InitialiseScene1(_rayTracer, _camera);
 
 	std::vector<int> threadCounts = { 8, 16, 32, 64, 128, 256 };
 
@@ -413,10 +476,12 @@ void Test2(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 			for (int frame = 0; frame < 10; ++frame)
 			{
 				_myFramework.ClearWindow();
+
 				Timer timer;
 				RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
 				totalFrameTime += timer.GetElapsedMilliseconds();
 				timer.Stop();
+
 				_myFramework.DrawScreenTexture();
 				_myFramework.SwapWindow();
 			}
@@ -439,8 +504,9 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	_camera.SetPosition(glm::vec3(0, 0, 0));
 	_camera.SetRotation(glm::vec3(0, 0, 0));
 
-	InitialiseScene2(_rayTracer);
+	InitialiseScene2(_rayTracer, _camera);
 
+	// Make sure ambient occlusion is enabled and set strength to 2 so we can easily see it is changing
 	_rayTracer.SetAmbientOcclusion(true);
 	_rayTracer.SetAOStrength(2);
 
@@ -465,16 +531,17 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 			for (int frame = 0; frame < 10; ++frame)
 			{
 				_myFramework.ClearWindow();
+
 				Timer timer;
 				RayTraceParallel(_threadPool, numTasks, _winSize, &_camera, &_rayTracer, &_myFramework);
 				totalFrameTime += timer.GetElapsedMilliseconds();
 				timer.Stop();
+
 				_myFramework.DrawScreenTexture();
 				_myFramework.SwapWindow();
 			}
 			float averageFrameTime = totalFrameTime / 10.0f;
 
-			// Record results
 			csvFile << "," << averageFrameTime;
 		}
 
@@ -484,13 +551,15 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	csvFile.close();
 
 
+	// Start second test on scene 1 instead of scene 2
+
 	std::ofstream csvFile2("test_3_scene1_results.csv");
 	csvFile2 << "AOSamples,1 splits,2 splits,3 splits\n";
 
 	_camera.SetPosition(glm::vec3(0, 0, 0));
 	_camera.SetRotation(glm::vec3(0, 0, 0));
 
-	InitialiseScene1(_rayTracer);
+	InitialiseScene1(_rayTracer, _camera);
 
 	_rayTracer.SetAmbientOcclusion(true);
 	_rayTracer.SetAOStrength(2);
@@ -535,15 +604,21 @@ void Test3(glm::ivec2& _winSize, Camera& _camera, RayTracer& _rayTracer, GCP_Fra
 	csvFile2.close();
 }
 
-void InitialiseScene1(RayTracer& _rayTracer)
+void InitialiseScene1(RayTracer& _rayTracer, Camera& _camera)
 {
+	// Clear the current scene
 	_rayTracer.ClearScene();
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
 
 	_rayTracer.SetAORadius(5.f);
 
+	// Add a light
 	glm::vec3 lightPos1 = glm::vec3(-40, 0, -50);
 	Light* light1 = new Light("Light 1", lightPos1, glm::vec3(1, 1, 1));
 	_rayTracer.AddLight(light1);
+	// Place a sphere in the same position as the light and give it isLight = true so it doesn't get used for shadows
 	Sphere* lightSphere1 = new Sphere("Light1", lightPos1, 2, glm::vec3(1, 1, 1));
 	RayObject* rayLightSphere1 = (RayObject*)lightSphere1;
 	rayLightSphere1->IsLight(true);
@@ -557,6 +632,7 @@ void InitialiseScene1(RayTracer& _rayTracer)
 	rayLightSphere2->IsLight(true);
 	_rayTracer.AddRayObject(rayLightSphere2);
 
+	// Add box
 	Box* box1 = new Box("Box1", glm::vec3(-46.3, 33, -67), glm::vec3(20, 20, 20), glm::vec3(0, 0, 1));
 	box1->SetAxis(glm::vec3(1, -0.36, 0.58));
 	box1->SetShininess(0.0f);
@@ -564,6 +640,7 @@ void InitialiseScene1(RayTracer& _rayTracer)
 	RayObject* rayBox1 = (RayObject*)box1;
 	_rayTracer.AddRayObject(rayBox1);
 
+	// Add cylinder
 	Cylinder* cylinder1 = new Cylinder("Cylinder1", glm::vec3(25.5f, -14.6f, -64), 8.5, 20, glm::vec3(0, 1, 0));
 	cylinder1->SetMetallic(0.34f);
 	cylinder1->SetShininess(0.0f);
@@ -571,6 +648,7 @@ void InitialiseScene1(RayTracer& _rayTracer)
 	RayObject* rayCylinder1 = (RayObject*)cylinder1;
 	_rayTracer.AddRayObject(rayCylinder1);
 
+	// Add sphere
 	Sphere* sphere1 = new Sphere("Sphere1", glm::vec3(-10, 0, -50), 10, glm::vec3(1.f, 0.898, 0.477));
 	sphere1->SetShininess(0.0f);
 	sphere1->SetTransparency(0.56f);
@@ -582,6 +660,7 @@ void InitialiseScene1(RayTracer& _rayTracer)
 	RayObject* raySphere2 = (RayObject*)sphere2;
 	_rayTracer.AddRayObject(raySphere2);
 
+	// Add plane
 	Plane* plane1 = new Plane("Plane1", glm::vec3(0, -14, -50), glm::vec3(0, 1, 0), glm::vec3(1, 1, 1));
 	plane1->SetShininess(0);
 	RayObject* rayPlane1 = (RayObject*)plane1;
@@ -594,9 +673,12 @@ void InitialiseScene1(RayTracer& _rayTracer)
 	_rayTracer.AddRayObject(rayPlane2);
 }
 
-void InitialiseScene2(RayTracer& _rayTracer)
+void InitialiseScene2(RayTracer& _rayTracer, Camera& _camera)
 {
 	_rayTracer.ClearScene();
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
 
 	_rayTracer.SetAORadius(1.1f);
 
@@ -638,9 +720,12 @@ void InitialiseScene2(RayTracer& _rayTracer)
 	RayObject* rayLightSphere = (RayObject*)lightSphere;
 }
 
-void InitialiseScene3(RayTracer& _rayTracer)
+void InitialiseScene3(RayTracer& _rayTracer, Camera& _camera)
 {
 	_rayTracer.ClearScene();
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
 
 	glm::vec3 lightPos1 = glm::vec3(-45, 10, -35);
 	Light* light1 = new Light("Light 1", lightPos1, glm::vec3(1, 1, 1));
@@ -679,4 +764,12 @@ void InitialiseScene3(RayTracer& _rayTracer)
 	plane2->SetRoughness(1);
 	RayObject* rayPlane2 = (RayObject*)plane2;
 	_rayTracer.AddRayObject(rayPlane2);
+}
+
+void InitialiseScene4(RayTracer& _rayTracer, Camera& _camera)
+{
+	_rayTracer.ClearScene();
+
+	_camera.SetPosition(glm::vec3(0, 0, 0));
+	_camera.SetRotation(glm::vec3(0, 0, 0));
 }

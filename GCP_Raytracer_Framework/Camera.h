@@ -15,6 +15,7 @@ public:
 
 	void CalculateMatricies(glm::ivec2 _winSize);
 
+	// Only recalculate matricies if the cameras position has changed
 	void SetPosition(glm::vec3 _position) { position = _position; CalculateMatricies(lastWinSize); }
 	glm::vec3 GetPosition() { return position; }
 

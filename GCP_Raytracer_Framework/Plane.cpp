@@ -14,6 +14,7 @@ Plane::Plane(std::string _name, glm::vec3 _position, glm::vec3 _normal, glm::vec
 
 bool Plane::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)
 {
+	// Calculate denominator
 	float denom = glm::dot(_ray.direction, mNormal);
 
 	float t = glm::dot((mPosition - _ray.origin), mNormal) / denom;
@@ -27,6 +28,7 @@ bool Plane::RayIntersect(Ray _ray, glm::vec3& _intersectPosition)
 
 glm::vec3 Plane::NormalAtPosition(glm::vec3 _intersectPosition)
 {
+	// Store normal so can just return it
 	return glm::normalize(mNormal);
 }
 

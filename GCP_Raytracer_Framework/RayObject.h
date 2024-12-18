@@ -14,6 +14,7 @@ public:
 	RayObject() {}
 	~RayObject() {}
 
+	// Pure virtual functions for derived classes to implement
 	virtual bool RayIntersect(Ray _ray, glm::vec3& _intersectPosition) = 0;
 	virtual glm::vec3 NormalAtPosition(glm::vec3 _intersectPosition) = 0;
 
@@ -22,11 +23,13 @@ public:
 	glm::vec3 CalulateDiffuseAndSpecular(glm::vec3 _intersectPosition, Light* _light, glm::vec3 _camPos);
 	glm::vec3 CalculatePBR(glm::vec3 _intersectPosition, Light* _light, glm::vec3 _camPos);
 
+	// PBR functions
 	glm::vec3 fresnelSchlick(float cosTheta, const glm::vec3& F0);
 	float DistributionGGX(const glm::vec3& N, const glm::vec3& H, float roughness);
 	float GeometrySchlickGGX(float NdotV, float roughness);
 	float GeometrySmith(const glm::vec3& N, const glm::vec3& V, const glm::vec3& L, float roughness);
 
+	// Getters and Setters
 	glm::vec3 GetPosition() { return mPosition; }
 	glm::vec3 GetAlbedo() { return mAlbedo; }
 	float GetShininess() { return mShininess; }
@@ -47,6 +50,7 @@ public:
 	void SetRoughness(float _roughness) { mRoughness = _roughness; }
 	void IsLight(bool _isLight) { mIsLight = _isLight; }
 
+	// UI function
 	virtual void UpdateUI();
 
 protected:

@@ -13,10 +13,12 @@ public:
 
 	glm::vec3 TraceRay(Ray _ray, glm::vec3 _camPos, int _depth);
 
+	// Ambient Occlusion
 	void GenerateHemisphereSamples(int _numSamples);
 	void SetNumAOSamples(int _numSamples);
 	float ComputeAO(glm::vec3 _position, glm::vec3 _normal);
 
+	// Getters and Setters
 	void SetBackgroundColour(glm::vec3 _colour) { mBackgroundColour = _colour; }
 	void SetAmbientColour(glm::vec3 _colour) { mAmbientColour = _colour; }
 	void SetPBR(bool _pbr) { mPBR = _pbr; }
@@ -40,9 +42,11 @@ public:
 	const std::vector<Light*>& GetLights() { return mLights; }
 	const std::vector<RayObject*>& GetRayObjects() { return rayObjects; }
 
+	// Add objects to the scene
 	void AddRayObject(RayObject* _rayObject) { rayObjects.push_back(_rayObject); }
 	void AddLight(Light* _light) { mLights.push_back(_light); }
 
+	// Scene management
 	int GetSizeOfRayObjects() { return rayObjects.size(); }
 	int GetSizeOfLights() { return mLights.size(); }
 	void ClearScene() { rayObjects.clear(); mLights.clear(); }
@@ -55,14 +59,11 @@ private:
 	float mAOStrength = 1.f;
 	float mAORadius = 5.f;
 	int mNumAOSamples = 16;
-	int mAOSplits = 2; // New member variable for the number of splits
+	int mAOSplits = 2;
 	bool mShadows = true;
 	int mMaxDepth = 2;
 
-	std::vector<glm::vec3> mHemisphereSamples;
-	std::vector<glm::vec3> mInitialCheckHemisphereSamples;
-	std::vector<glm::vec3> mRestOfHemisphereSamples;
-	std::vector<std::vector<glm::vec3>> mSplitHemisphereSamples; // New member variable for split samples
+	std::vector<std::vector<glm::vec3>> mSplitHemisphereSamples;
 
 	std::vector<RayObject*> rayObjects;
 	std::vector<Light*> mLights;

@@ -5,7 +5,8 @@
 #include <condition_variable>
 #include <functional>
 
-class ThreadPool {
+class ThreadPool
+{
 public:
     ThreadPool(size_t numThreads);
     ~ThreadPool();

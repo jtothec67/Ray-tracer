@@ -1,13 +1,14 @@
 #include "RayTracer.h"
-#include <iostream>
 
 RayTracer::RayTracer()
 {
+	// Generate hemisphere samples on start
 	GenerateHemisphereSamples(mNumAOSamples);
 }
 
 glm::vec3 RayTracer::TraceRay(Ray _ray, glm::vec3 _camPos, int _depth)
 {
+	// Find the closest object hit by the ray
 	glm::vec3 currentHitPos;
 	RayObject* currentRayObject = nullptr;
 
