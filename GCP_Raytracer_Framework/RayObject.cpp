@@ -130,17 +130,17 @@ void RayObject::UpdateUI()
 
     ImGui::SliderFloat(("Shininess(pbr) " + mName).c_str(), &mShininess, 0.0f, 1.0f);
 
-    ImGui::ColorEdit3(("Albedo" + mName).c_str(), &mAlbedo[0]);
+    ImGui::ColorEdit3(("Albedo " + mName).c_str(), &mAlbedo[0]);
 
-    ImGui::SliderFloat(("Metallic" + mName).c_str(), &mMetallic, 0.0f, 1.0f);
+    ImGui::SliderFloat(("Metallic " + mName).c_str(), &mMetallic, 0.0f, 1.0f);
 
-    ImGui::SliderFloat(("Roughness" + mName).c_str(), &mRoughness, 0.0f, 1.0f);
+    ImGui::SliderFloat(("Roughness " + mName).c_str(), &mRoughness, 0.0f, 1.0f);
 
-    ImGui::SliderFloat(("Reflectivity" + mName).c_str(), &mReflectivity, 0.0f, 1.0f);
+    ImGui::SliderFloat(("Reflectivity " + mName).c_str(), &mReflectivity, 0.0f, 1.0f);
 
-    ImGui::SliderFloat(("Refractive Index" + mName).c_str(), &mRefractiveIndex, 1.0f, 2.0f);
+    ImGui::SliderFloat(("Refractive Index " + mName).c_str(), &mRefractiveIndex, 1.0f, 2.0f);
 
-    ImGui::SliderFloat(("Transparency" + mName).c_str(), &mTransparency, 0.0f, 1.0f);
+    ImGui::SliderFloat(("Transparency " + mName).c_str(), &mTransparency, 0.0f, 1.0f);
 
-    ImGui::SliderFloat3(("Position" + mName).c_str(), &mPosition[0], -100, 100);
+    ImGui::SliderFloat3(("Position " + mName).c_str(), &mPosition[0], -100, 100);
 }

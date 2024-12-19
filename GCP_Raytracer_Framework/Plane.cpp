@@ -39,5 +39,5 @@ void Plane::UpdateUI()
 
 	RayObject::UpdateUI();
 
-	ImGui::SliderFloat3(("Normal" + mName).c_str(), &mNormal[0], -1, 1);
+	ImGui::SliderFloat3(("Normal " + mName).c_str(), &mNormal[0], -1, 1);
 }

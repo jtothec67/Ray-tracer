@@ -107,6 +107,6 @@ void Box::UpdateUI()
 
     RayObject::UpdateUI();
 
-    ImGui::SliderFloat3(("Size" + mName).c_str(), &mSize[0], 0.0f, 20.0f);
-    ImGui::SliderFloat3(("Rotation" + mName).c_str(), &mAxis[0], -1.0f, 1.0f);
+    ImGui::SliderFloat3(("Size " + mName).c_str(), &mSize[0], 0.0f, 20.0f);
+    ImGui::SliderFloat3(("Rotation " + mName).c_str(), &mAxis[0], -1.0f, 1.0f);
 }

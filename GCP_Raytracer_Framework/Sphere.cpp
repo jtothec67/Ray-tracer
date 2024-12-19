@@ -63,5 +63,5 @@ void Sphere::UpdateUI()
 
 	RayObject::UpdateUI();
 
-	ImGui::SliderFloat(("Radius" + mName).c_str(), &mRadius, 0.0f, 20.0f);
+	ImGui::SliderFloat(("Radius " + mName).c_str(), &mRadius, 0.0f, 20.0f);
 }
