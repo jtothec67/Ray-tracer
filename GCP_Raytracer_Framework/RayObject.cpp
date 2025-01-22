@@ -128,7 +128,7 @@ void RayObject::UpdateUI()
 
     ImGui::Text(mName.c_str());
 
-    ImGui::SliderFloat(("Shininess(pbr) " + mName).c_str(), &mShininess, 0.0f, 1.0f);
+    ImGui::SliderFloat(("Shininess (non-pbr) " + mName).c_str(), &mShininess, 0.0f, 1.0f);
 
     ImGui::ColorEdit3(("Albedo " + mName).c_str(), &mAlbedo[0]);
 

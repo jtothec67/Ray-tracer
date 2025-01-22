@@ -290,11 +290,11 @@ int main(int argc, char* argv[])
 			}
 
 			int tasks = numTasks;
-			ImGui::SliderInt("Number of tasks", &tasks, 0, 128);
+			ImGui::SliderInt("Number of tasks", &tasks, 1, 128);
 			numTasks = tasks;
 
 			int threads = numThreads;
-			ImGui::SliderInt("Number of threads", &threads, 0, 128);
+			ImGui::SliderInt("Number of threads", &threads, 1, 128);
 			if (threads != numThreads)
 			{
 				threadPool.Shutdown();
