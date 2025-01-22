@@ -15,11 +15,11 @@ At the top of the Imgui window you can see the exact FPS number. The console out
 The top 4 buttons will initialise scenes.
 
 The empty scene is there for you to make your own scene by creating objects at the cameras position with the key bindings (a bit fidly)
-	- m adds a sphere
-	- p adds a plane
-	- l adds a light
-	- c adds a cylinder
-	- b adds a box
+- m adds a sphere
+- p adds a plane
+- l adds a light
+- c adds a cylinder
+- b adds a box
 
 The Imgui menu should update automatically with the new items in the scene. You will be able to change material properties as well as physical properties such as position and the rotation.
 
