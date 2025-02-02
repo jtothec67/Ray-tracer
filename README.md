@@ -1,6 +1,6 @@
 Ray tracer
 
-To download the .exe, go to the release tab and download the "Release.zip". Unzip it, open the folder and run GCP_Raytracer_Framework.exe (name because we had to use the template given to us for the assignment) (I promise it's not a virus).
+To download the .exe, go to the release tab and download the "RayTracer.zip". Unzip it, open the folder and run GCP_Raytracer_Framework.exe (name because we had to use the template given to us for the assignment) (I promise it's not a virus).
 
 To see the code, download the repository, and open the GCP_Raytracer_Framework.sln in Visual Studio. It may or may not work? It may also run but display a black screen. I am not sure why, but the .exe in Releases on GitHub should work. (Or just view the code on GitHub)
 
