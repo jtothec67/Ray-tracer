@@ -149,6 +149,13 @@ int main(int argc, char* argv[])
 			{
 				running = false;
 			}
+			else if (e.type == SDL_WINDOWEVENT)
+			{
+				if (e.window.event == SDL_WINDOWEVENT_CLOSE)
+				{
+					running = false;
+				}
+			}
 			if (e.type == SDL_KEYDOWN)
 			{
 				switch (e.key.keysym.sym)
